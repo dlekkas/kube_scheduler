@@ -21,7 +21,7 @@ gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_MEASURE_NAME} \
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_MEASURE_NAME} \
 									 --command="./memcache-perf/mcperf -s ${MEMCACHED_IP} -a ${INTERNAL_AGENT_IP} \
 									 																	 --noload -T 16 -C 4 -D 4 -Q 1000 -c 4 -t 5 \
-																										 --scan 5000:10000:5000 > ${measure_res}"
+																										 --scan 5000:55000:5000 > ${measure_res}"
 # stop the agent
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_AGENT_NAME} \
 									 --command="pkill -f mcperf"
