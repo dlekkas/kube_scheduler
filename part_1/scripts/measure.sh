@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 1 ]; then
 	echo "Usage: ./measure.sh <n-reps>"
 	exit 1
 fi
@@ -8,8 +8,8 @@ fi
 n_reps=$1
 
 login_key=$HOME/.ssh/cloud-computing
-results_dir=results
-interf_dir=interference
+results_dir=../results
+interf_dir=../interference
 
 CLIENT_AGENT_NAME=`kubectl get nodes -o wide | awk '{print $1}' | sed -n 2p`
 CLIENT_MEASURE_NAME=`kubectl get nodes -o wide | awk '{print $1}' | sed -n 3p`

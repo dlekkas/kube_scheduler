@@ -1,13 +1,38 @@
 #!/bin/bash
-set -x
+
+ETH_ID="dilekkas"
+GROUP_NO="035"
+PROJ_ROOT_DIR=..
 
 login_key=$HOME/.ssh/cloud-computing
+bucket_id=gs://cca-eth-2021-group-${GROUP_NO}-${ETH_ID}/
+
+# create a bucket in Google Cloud Storage (GCS) to store configuration only if
+# the bucket doesn't already exist
+gsutil ls -b ${bucket_id} &> /dev/null || gsutil mb ${bucket_id}
+
+if [[ -z "$KOPS_STATE_STORE" ]]; then
+	# make the env variable immediately available
+	export KOPS_STATE_STORE=${bucket_id}
+	# preserve the env variable - after running the script run `source ~/.bashrc`
+	SHELL_CONF_FILE=$HOME/.`basename $SHELL`rc
+	echo "export KOPS_STATE_STORE=${bucket_id}" >> $SHELL_CONF_FILE
+	echo "Invoke 'source ~/.bashrc' to make KOPS_STATE_STORE env variable available"
+fi
+
+if [ ! -f ${login_key} ]; then
+	echo "Creating an ssh key to login to Kubernetes nodes..."
+	ssh-keygen -t rsa -b 4096 -f cloud-computing
+fi
+
+sed -i "s/group-XXX/group-${GROUP_NO}/g" ${PROJ_ROOT_DIR}/part1.yaml
+sed -i "s/ethzid/${ETH_ID}/g" ${PROJ_ROOT_DIR}/part1.yaml
 
 export PROJECT=`gcloud config get-value project`
 export KOPS_FEATURE_FLAGS=AlphaAllowGCE   # to unlock GCE features
 
 # create a kubernetes cluster based on the configuration file
-kops create -f part1.yaml
+kops create -f ${PROJ_ROOT_DIR}/part1.yaml
 # add ssh key as a login key for our nodes
 kops create secret --name part1.k8s.local sshpublickey admin -i ${login_key}.pub
 # deploy cluster
@@ -20,7 +45,7 @@ kubectl get nodes -o wide
 
 echo "Launching memcached using Kubernetes..."
 memcached_name=some-memcached-11211
-kubectl create -f memcache-t1-cpuset.yaml
+kubectl create -f ${PROJ_ROOT_DIR}/memcache-t1-cpuset.yaml
 kubectl expose pod some-memcached --name ${memcached_name} --type LoadBalancer \
 																	--port 11211 --protocol TCP
 
