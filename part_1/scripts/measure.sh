@@ -24,10 +24,8 @@ measure_res=measurements.dat
 
 echo "-------------- No interference ---------------"
 # initiate the agent
-echo "Initiating client agent..."
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_AGENT_NAME} \
 		--command="./memcache-perf/mcperf -T 16 -A > ${agent_res}" 2>/dev/null &
-
 # load the memcached database with key-value pairs
 echo "Loading memcached database with key-value pairs..."
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_MEASURE_NAME} \
@@ -35,7 +33,7 @@ gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_MEASURE_NAME} \
 
 for i in $( seq 1 ${n_reps} ); do
 	# query memcached with throughput increasing from 5000 QPS to 55000 QPS in increments of 5000
-	echo "Repetition ${i}: Querying memcached with increasing QPS..."
+	echo "Rep ${i}: Querying memcached with increasing QPS..."
 	gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_MEASURE_NAME} \
 			--command="./memcache-perf/mcperf -s ${MEMCACHED_IP} -a ${INTERNAL_AGENT_IP} \
 																				--noload -T 16 -C 4 -D 4 -Q 1000 -c 4 -t 5 \
@@ -49,16 +47,12 @@ for i in $( seq 1 ${n_reps} ); do
 	# keep only the measurement lines and only relevant columns (P95 and QPS)
 	sed -ni '1,12p' ${res_file}
 	awk '{print $13, $17}' ${res_file} > tmpf && mv tmpf ${res_file}
-
-	echo "Repetition ${i}: Measurements collected successfully."
-	echo "Results stored in ${res_file}"
 done
-
 # stop the agent
-echo "Stopping client agent..."
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_AGENT_NAME} \
 		--command="pkill -f mcperf"
 echo "----------------------------------------------"
+
 
 cd ${interf_dir}
 for f in *; do
@@ -66,10 +60,9 @@ for f in *; do
 	echo -e "\n-------------- Interference: ${interf} ---------------"
 
 	# initiate the agent
-	echo "Initiating client agent..."
 	gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_AGENT_NAME} \
 			--command="./memcache-perf/mcperf -T 16 -A > ${agent_res}" 2>/dev/null &
-
+	# launch resource interference
 	echo "Launching resource interference ${interf}..."
 	kubectl create -f ${f}
 
@@ -83,12 +76,11 @@ for f in *; do
 
 	for i in $( seq 1 ${n_reps} ); do
 		# query memcached with throughput increasing from 5000 QPS to 55000 QPS in increments of 5000
-		echo "Repetition ${i}: Querying memcached with increasing QPS..."
+		echo "Rep ${i}: Querying memcached with increasing QPS..."
 		gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_MEASURE_NAME} \
 				--command="./memcache-perf/mcperf -s ${MEMCACHED_IP} -a ${INTERNAL_AGENT_IP} \
 																					--noload -T 16 -C 4 -D 4 -Q 1000 -c 4 -t 5 \
 																					--scan 5000:55000:5000 > ${measure_res}"
-
 		# copy results file from measurement node to host machine
 		mkdir -p ${results_dir}/intf_${interf}/rep_${i}
 		res_file=${results_dir}/intf_${interf}/rep_${i}/${measure_res}
@@ -98,20 +90,14 @@ for f in *; do
 		# keep only the measurement lines and only relevant columns (P95 and QPS)
 		sed -ni '1,12p' ${res_file}
 		awk '{print $13, $17}' ${res_file} > tmpf && mv tmpf ${res_file}
-
-		echo "Repetition ${i}: Measurements collected successfully."
-		echo "Results stored in ${res_file}"
 	done
 
 	# stop the agent
-	echo "Stopping client agent..."
 	gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_AGENT_NAME} \
 			--command="pkill -f mcperf"
-
 	# kill the interference job once we have finished collecting measurements
 	echo "Killing interference job..."
 	kubectl delete pods ${interf}
-
 	echo "----------------------------------------------"
 done
 
