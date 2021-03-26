@@ -28,7 +28,7 @@ kubectl expose pod some-memcached --name ${memcached_name} --type LoadBalancer \
 sleep 60
 kubectl get service ${memcached_name}
 
-echo "Memcached service details are shown below"
+echo "Memcached service details are shown below:"
 kubectl get pods -o wide
 
 MEMCACHED_IPADDR=`kubectl get pods -o wide | awk '{print $6}' | tail -n1`
