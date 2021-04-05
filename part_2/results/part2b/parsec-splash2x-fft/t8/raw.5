@@ -1,0 +1,81 @@
+[PARSEC] Benchmarks to run:  splash2x.fft
+
+[PARSEC] [========== Running benchmark splash2x.fft [1] ==========]
+[PARSEC] Setting up run directory.
+[PARSEC] No archive for input 'native' available, skipping input setup.
+[PARSEC] Running 'time /parsec-benchmark/ext/splash2x/kernels/fft/inst/amd64-linux.gcc/bin/run.sh 8 native':
+[PARSEC] [---------- Beginning of output ----------]
+Generating input file ...
+Running /parsec-benchmark/ext/splash2x/kernels/fft/inst/amd64-linux.gcc/bin/fft -m28 -p8:
+
+FFT with Blocking Transpose
+   268435456 Complex Doubles
+   8 Processors
+   65536 Cache lines
+   16 Byte line size
+   4096 Bytes per page
+
+iter_num = 2048
+iter_num = 2048
+iter_num = 2048
+iter_num = 2048
+iter_num = 2048
+iter_num = 2048
+iter_num = 2048
+iter_num = 2048
+Transpose: iter_num = 0
+Transpose: iter_num = 4194304
+Transpose: iter_num = 8388608
+Transpose: iter_num = 12582912
+Transpose: iter_num = 16777216
+Transpose: iter_num = 20971520
+Transpose: iter_num = 25165824
+Transpose: iter_num = 29360128
+FFt1DOnce: iter_num = 114688
+Step 1:  7923591
+Transpose: iter_num = 0
+Step 2:  9518467
+Transpose: iter_num = 4194304
+Transpose: iter_num = 8388608
+Transpose: iter_num = 12582912
+Transpose: iter_num = 16777216
+Transpose: iter_num = 20971520
+Transpose: iter_num = 25165824
+Transpose: iter_num = 29360128
+Step 3:  1942231
+Transpose: iter_num = 0
+Step 4:  8785497
+Transpose: iter_num = 4194304
+Transpose: iter_num = 8388608
+Transpose: iter_num = 12582912
+Transpose: iter_num = 16777216
+Transpose: iter_num = 20971520
+Transpose: iter_num = 25165824
+Transpose: iter_num = 29360128
+Step 5:  1183912
+
+                 PROCESS STATISTICS
+            Computation      Transpose     Transpose
+ Proc          Time            Time        Fraction
+    0          29387652       11049734       0.37600
+
+                 TIMING INFORMATION
+Start time                        : 1617591377914358
+Initialization finish time        : 1617591416885237
+Overall finish time               : 1617591446272889
+Total time with initialization    :         68358531
+Total time without initialization :         29387652
+Overall transpose time            :         11049734
+Overall transpose fraction        :          0.37600
+
+
+real	1m8.983s
+user	3m31.785s
+sys	1m1.353s
+[PARSEC] [----------    End of output    ----------]
+[PARSEC]
+[PARSEC] BIBLIOGRAPHY
+[PARSEC]
+[PARSEC] [1] Woo et al. The SPLASH-2 Programs: Characterization and Methodological Considerations. ISCA, 1995.
+[PARSEC]
+[PARSEC] Done.
