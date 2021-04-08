@@ -14,7 +14,7 @@ ps_dir=../parsec-benchmarks/part2a
 
 PARSEC_NODE=$(kubectl get nodes -o wide | awk '{print $1}' | sed -n 3p)
 
-ib_name="none"
+ib_name="ibench-none"
 
 for i in $(seq 1 ${n_reps}); do
   echo "Rep ${i}: Running PARSEC jobs..."
