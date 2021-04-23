@@ -7,8 +7,6 @@ import argparse
 import os
 import sys
 
-jobs = ['blackscholes', 'canneal', 'freqmine', 'splash2x-fft']
-times = [(10, 30), (20,65), (50, 90), (60, 70)]
 
 latencies_f = 'memcached_latencies.dat'
 job_times_f = 'job_results.csv'

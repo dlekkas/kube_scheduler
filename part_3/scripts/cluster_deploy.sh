@@ -7,7 +7,7 @@ GROUP_NO="035"
 PROJ_ROOT_DIR=..
 
 login_key=$HOME/.ssh/cloud-computing
-proj_id=cca-eth-2021-group-${GROUP_NO}-${ETH_ID}-priv
+proj_id=cca-eth-2021-group-${GROUP_NO}-${ETH_ID}
 
 # create a bucket in Google Cloud Storage (GCS) to store configuration only if
 # the bucket doesn't already exist
