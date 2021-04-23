@@ -73,3 +73,6 @@ gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_MEASURE_NAME} \
 									 --zone=europe-west3-a --command='bash -s' < compile_mcperf.sh
 
 rm compile_mcperf.sh
+
+# spin up metrics server for monitoring utilization across kube nodes
+kubectl apply -f ${PROJ_ROOT_DIR}/metrics.yaml

@@ -14,7 +14,7 @@ mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=["r", "k", "b"])
 
 util_d = {'node': [], 'cpu': [], 'mem': [], 'time': []}
 
-def plot_utilization():
+def plot_utilization(output_f):
     util_df = pd.DataFrame.from_dict(util_d)
     util_df.set_index('time', inplace=True)
 
@@ -28,13 +28,13 @@ def plot_utilization():
     axes[1].set_xlabel("Time (sec)")
 
     figure.suptitle('Cluster utilization')
-    plt.savefig('test_util.png')
+    plt.savefig(output_f)
 
 
-def main(interval, nodes):
+def main(interval, nodes, output):
 
     def signal_handler(sig, frame):
-        plot_utilization()
+        plot_utilization(output)
         sys.exit(0)
 
     signal.signal(signal.SIGINT, signal_handler)
@@ -72,6 +72,8 @@ if __name__=="__main__":
     parser.add_argument('--nodes', help='cca-project-nodetype labels',
                         nargs='+', type=check_node_validity,
                         default=['node-a-2core', 'node-b-4core', 'node-c-8core'])
+    parser.add_argument('--output', help='file to store utilization plot',
+                        default='utilization.png', required=False)
     args = parser.parse_args()
-    main(args.interval, args.nodes)
+    main(args.interval, args.nodes, args.output)
 
