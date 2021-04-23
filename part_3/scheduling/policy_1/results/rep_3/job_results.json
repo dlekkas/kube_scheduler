@@ -1,0 +1,926 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "batch/v1",
+            "kind": "Job",
+            "metadata": {
+                "creationTimestamp": "2021-04-22T20:38:01Z",
+                "labels": {
+                    "name": "pasec-blackscholes"
+                },
+                "managedFields": [
+                    {
+                        "apiVersion": "batch/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {
+                            "f:metadata": {
+                                "f:labels": {
+                                    ".": {},
+                                    "f:name": {}
+                                }
+                            },
+                            "f:spec": {
+                                "f:backoffLimit": {},
+                                "f:completions": {},
+                                "f:parallelism": {},
+                                "f:template": {
+                                    "f:spec": {
+                                        "f:containers": {
+                                            "k:{\"name\":\"parsecblackscholes\"}": {
+                                                ".": {},
+                                                "f:args": {},
+                                                "f:command": {},
+                                                "f:image": {},
+                                                "f:imagePullPolicy": {},
+                                                "f:name": {},
+                                                "f:resources": {
+                                                    ".": {},
+                                                    "f:limits": {
+                                                        ".": {},
+                                                        "f:cpu": {}
+                                                    }
+                                                },
+                                                "f:terminationMessagePath": {},
+                                                "f:terminationMessagePolicy": {}
+                                            }
+                                        },
+                                        "f:dnsPolicy": {},
+                                        "f:nodeSelector": {
+                                            ".": {},
+                                            "f:cca-project-nodetype": {}
+                                        },
+                                        "f:restartPolicy": {},
+                                        "f:schedulerName": {},
+                                        "f:securityContext": {},
+                                        "f:terminationGracePeriodSeconds": {}
+                                    }
+                                }
+                            }
+                        },
+                        "manager": "kubectl-create",
+                        "operation": "Update",
+                        "time": "2021-04-22T20:38:01Z"
+                    },
+                    {
+                        "apiVersion": "batch/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {
+                            "f:status": {
+                                "f:completionTime": {},
+                                "f:conditions": {
+                                    ".": {},
+                                    "k:{\"type\":\"Complete\"}": {
+                                        ".": {},
+                                        "f:lastProbeTime": {},
+                                        "f:lastTransitionTime": {},
+                                        "f:status": {},
+                                        "f:type": {}
+                                    }
+                                },
+                                "f:startTime": {},
+                                "f:succeeded": {}
+                            }
+                        },
+                        "manager": "kube-controller-manager",
+                        "operation": "Update",
+                        "time": "2021-04-22T20:42:13Z"
+                    }
+                ],
+                "name": "parsec-blackscholes",
+                "namespace": "default",
+                "resourceVersion": "120244",
+                "selfLink": "/apis/batch/v1/namespaces/default/jobs/parsec-blackscholes",
+                "uid": "0335cc05-abaa-4625-9751-79f0a1a0a4eb"
+            },
+            "spec": {
+                "backoffLimit": 6,
+                "completions": 1,
+                "parallelism": 1,
+                "selector": {
+                    "matchLabels": {
+                        "controller-uid": "0335cc05-abaa-4625-9751-79f0a1a0a4eb"
+                    }
+                },
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "labels": {
+                            "controller-uid": "0335cc05-abaa-4625-9751-79f0a1a0a4eb",
+                            "job-name": "parsec-blackscholes"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "args": [
+                                    "-c",
+                                    "taskset -c 6-7 ./bin/parsecmgmt -a run -p blackscholes -i native -n 2"
+                                ],
+                                "command": [
+                                    "/bin/sh"
+                                ],
+                                "image": "anakli/parsec:blackscholes-native-reduced",
+                                "imagePullPolicy": "Always",
+                                "name": "parsecblackscholes",
+                                "resources": {
+                                    "limits": {
+                                        "cpu": "1500m"
+                                    }
+                                },
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File"
+                            }
+                        ],
+                        "dnsPolicy": "ClusterFirst",
+                        "nodeSelector": {
+                            "cca-project-nodetype": "node-c-8core"
+                        },
+                        "restartPolicy": "Never",
+                        "schedulerName": "default-scheduler",
+                        "securityContext": {},
+                        "terminationGracePeriodSeconds": 30
+                    }
+                }
+            },
+            "status": {
+                "completionTime": "2021-04-22T20:42:13Z",
+                "conditions": [
+                    {
+                        "lastProbeTime": "2021-04-22T20:42:13Z",
+                        "lastTransitionTime": "2021-04-22T20:42:13Z",
+                        "status": "True",
+                        "type": "Complete"
+                    }
+                ],
+                "startTime": "2021-04-22T20:38:01Z",
+                "succeeded": 1
+            }
+        },
+        {
+            "apiVersion": "batch/v1",
+            "kind": "Job",
+            "metadata": {
+                "creationTimestamp": "2021-04-22T20:38:02Z",
+                "labels": {
+                    "name": "pasec-canneal"
+                },
+                "managedFields": [
+                    {
+                        "apiVersion": "batch/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {
+                            "f:metadata": {
+                                "f:labels": {
+                                    ".": {},
+                                    "f:name": {}
+                                }
+                            },
+                            "f:spec": {
+                                "f:backoffLimit": {},
+                                "f:completions": {},
+                                "f:parallelism": {},
+                                "f:template": {
+                                    "f:spec": {
+                                        "f:containers": {
+                                            "k:{\"name\":\"parseccanneal\"}": {
+                                                ".": {},
+                                                "f:args": {},
+                                                "f:command": {},
+                                                "f:image": {},
+                                                "f:imagePullPolicy": {},
+                                                "f:name": {},
+                                                "f:resources": {
+                                                    ".": {},
+                                                    "f:requests": {
+                                                        ".": {},
+                                                        "f:cpu": {}
+                                                    }
+                                                },
+                                                "f:terminationMessagePath": {},
+                                                "f:terminationMessagePolicy": {}
+                                            }
+                                        },
+                                        "f:dnsPolicy": {},
+                                        "f:nodeSelector": {
+                                            ".": {},
+                                            "f:cca-project-nodetype": {}
+                                        },
+                                        "f:restartPolicy": {},
+                                        "f:schedulerName": {},
+                                        "f:securityContext": {},
+                                        "f:terminationGracePeriodSeconds": {}
+                                    }
+                                }
+                            }
+                        },
+                        "manager": "kubectl-create",
+                        "operation": "Update",
+                        "time": "2021-04-22T20:38:02Z"
+                    },
+                    {
+                        "apiVersion": "batch/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {
+                            "f:status": {
+                                "f:completionTime": {},
+                                "f:conditions": {
+                                    ".": {},
+                                    "k:{\"type\":\"Complete\"}": {
+                                        ".": {},
+                                        "f:lastProbeTime": {},
+                                        "f:lastTransitionTime": {},
+                                        "f:status": {},
+                                        "f:type": {}
+                                    }
+                                },
+                                "f:startTime": {},
+                                "f:succeeded": {}
+                            }
+                        },
+                        "manager": "kube-controller-manager",
+                        "operation": "Update",
+                        "time": "2021-04-22T20:42:25Z"
+                    }
+                ],
+                "name": "parsec-canneal",
+                "namespace": "default",
+                "resourceVersion": "120286",
+                "selfLink": "/apis/batch/v1/namespaces/default/jobs/parsec-canneal",
+                "uid": "70907bd3-2033-4e95-bbc6-d742709806ff"
+            },
+            "spec": {
+                "backoffLimit": 6,
+                "completions": 1,
+                "parallelism": 1,
+                "selector": {
+                    "matchLabels": {
+                        "controller-uid": "70907bd3-2033-4e95-bbc6-d742709806ff"
+                    }
+                },
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "labels": {
+                            "controller-uid": "70907bd3-2033-4e95-bbc6-d742709806ff",
+                            "job-name": "parsec-canneal"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "args": [
+                                    "-c",
+                                    "taskset -c 3-5 ./bin/parsecmgmt -a run -p canneal -i native -n 3"
+                                ],
+                                "command": [
+                                    "/bin/sh"
+                                ],
+                                "image": "anakli/parsec:canneal-native-reduced",
+                                "imagePullPolicy": "Always",
+                                "name": "parseccanneal",
+                                "resources": {
+                                    "requests": {
+                                        "cpu": "2500m"
+                                    }
+                                },
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File"
+                            }
+                        ],
+                        "dnsPolicy": "ClusterFirst",
+                        "nodeSelector": {
+                            "cca-project-nodetype": "node-c-8core"
+                        },
+                        "restartPolicy": "Never",
+                        "schedulerName": "default-scheduler",
+                        "securityContext": {},
+                        "terminationGracePeriodSeconds": 30
+                    }
+                }
+            },
+            "status": {
+                "completionTime": "2021-04-22T20:42:25Z",
+                "conditions": [
+                    {
+                        "lastProbeTime": "2021-04-22T20:42:25Z",
+                        "lastTransitionTime": "2021-04-22T20:42:25Z",
+                        "status": "True",
+                        "type": "Complete"
+                    }
+                ],
+                "startTime": "2021-04-22T20:38:02Z",
+                "succeeded": 1
+            }
+        },
+        {
+            "apiVersion": "batch/v1",
+            "kind": "Job",
+            "metadata": {
+                "creationTimestamp": "2021-04-22T20:38:01Z",
+                "labels": {
+                    "name": "pasec-dedup"
+                },
+                "managedFields": [
+                    {
+                        "apiVersion": "batch/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {
+                            "f:metadata": {
+                                "f:labels": {
+                                    ".": {},
+                                    "f:name": {}
+                                }
+                            },
+                            "f:spec": {
+                                "f:backoffLimit": {},
+                                "f:completions": {},
+                                "f:parallelism": {},
+                                "f:template": {
+                                    "f:spec": {
+                                        "f:containers": {
+                                            "k:{\"name\":\"parsecdedup\"}": {
+                                                ".": {},
+                                                "f:args": {},
+                                                "f:command": {},
+                                                "f:image": {},
+                                                "f:imagePullPolicy": {},
+                                                "f:name": {},
+                                                "f:resources": {},
+                                                "f:terminationMessagePath": {},
+                                                "f:terminationMessagePolicy": {}
+                                            }
+                                        },
+                                        "f:dnsPolicy": {},
+                                        "f:nodeSelector": {
+                                            ".": {},
+                                            "f:cca-project-nodetype": {}
+                                        },
+                                        "f:restartPolicy": {},
+                                        "f:schedulerName": {},
+                                        "f:securityContext": {},
+                                        "f:terminationGracePeriodSeconds": {}
+                                    }
+                                }
+                            }
+                        },
+                        "manager": "kubectl-create",
+                        "operation": "Update",
+                        "time": "2021-04-22T20:38:01Z"
+                    },
+                    {
+                        "apiVersion": "batch/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {
+                            "f:status": {
+                                "f:completionTime": {},
+                                "f:conditions": {
+                                    ".": {},
+                                    "k:{\"type\":\"Complete\"}": {
+                                        ".": {},
+                                        "f:lastProbeTime": {},
+                                        "f:lastTransitionTime": {},
+                                        "f:status": {},
+                                        "f:type": {}
+                                    }
+                                },
+                                "f:startTime": {},
+                                "f:succeeded": {}
+                            }
+                        },
+                        "manager": "kube-controller-manager",
+                        "operation": "Update",
+                        "time": "2021-04-22T20:39:55Z"
+                    }
+                ],
+                "name": "parsec-dedup",
+                "namespace": "default",
+                "resourceVersion": "119780",
+                "selfLink": "/apis/batch/v1/namespaces/default/jobs/parsec-dedup",
+                "uid": "a59e3363-db51-4d78-a366-7a240aabf222"
+            },
+            "spec": {
+                "backoffLimit": 6,
+                "completions": 1,
+                "parallelism": 1,
+                "selector": {
+                    "matchLabels": {
+                        "controller-uid": "a59e3363-db51-4d78-a366-7a240aabf222"
+                    }
+                },
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "labels": {
+                            "controller-uid": "a59e3363-db51-4d78-a366-7a240aabf222",
+                            "job-name": "parsec-dedup"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "args": [
+                                    "-c",
+                                    "taskset -c 1 ./bin/parsecmgmt -a run -p dedup -i native -n 1"
+                                ],
+                                "command": [
+                                    "/bin/sh"
+                                ],
+                                "image": "anakli/parsec:dedup-native-reduced",
+                                "imagePullPolicy": "Always",
+                                "name": "parsecdedup",
+                                "resources": {},
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File"
+                            }
+                        ],
+                        "dnsPolicy": "ClusterFirst",
+                        "nodeSelector": {
+                            "cca-project-nodetype": "node-a-2core"
+                        },
+                        "restartPolicy": "Never",
+                        "schedulerName": "default-scheduler",
+                        "securityContext": {},
+                        "terminationGracePeriodSeconds": 30
+                    }
+                }
+            },
+            "status": {
+                "completionTime": "2021-04-22T20:39:55Z",
+                "conditions": [
+                    {
+                        "lastProbeTime": "2021-04-22T20:39:55Z",
+                        "lastTransitionTime": "2021-04-22T20:39:55Z",
+                        "status": "True",
+                        "type": "Complete"
+                    }
+                ],
+                "startTime": "2021-04-22T20:38:01Z",
+                "succeeded": 1
+            }
+        },
+        {
+            "apiVersion": "batch/v1",
+            "kind": "Job",
+            "metadata": {
+                "creationTimestamp": "2021-04-22T20:38:01Z",
+                "labels": {
+                    "name": "pasec-ferret"
+                },
+                "managedFields": [
+                    {
+                        "apiVersion": "batch/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {
+                            "f:metadata": {
+                                "f:labels": {
+                                    ".": {},
+                                    "f:name": {}
+                                }
+                            },
+                            "f:spec": {
+                                "f:backoffLimit": {},
+                                "f:completions": {},
+                                "f:parallelism": {},
+                                "f:template": {
+                                    "f:spec": {
+                                        "f:containers": {
+                                            "k:{\"name\":\"parsecferret\"}": {
+                                                ".": {},
+                                                "f:args": {},
+                                                "f:command": {},
+                                                "f:image": {},
+                                                "f:imagePullPolicy": {},
+                                                "f:name": {},
+                                                "f:resources": {},
+                                                "f:terminationMessagePath": {},
+                                                "f:terminationMessagePolicy": {}
+                                            }
+                                        },
+                                        "f:dnsPolicy": {},
+                                        "f:nodeSelector": {
+                                            ".": {},
+                                            "f:cca-project-nodetype": {}
+                                        },
+                                        "f:restartPolicy": {},
+                                        "f:schedulerName": {},
+                                        "f:securityContext": {},
+                                        "f:terminationGracePeriodSeconds": {}
+                                    }
+                                }
+                            }
+                        },
+                        "manager": "kubectl-create",
+                        "operation": "Update",
+                        "time": "2021-04-22T20:38:01Z"
+                    },
+                    {
+                        "apiVersion": "batch/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {
+                            "f:status": {
+                                "f:completionTime": {},
+                                "f:conditions": {
+                                    ".": {},
+                                    "k:{\"type\":\"Complete\"}": {
+                                        ".": {},
+                                        "f:lastProbeTime": {},
+                                        "f:lastTransitionTime": {},
+                                        "f:status": {},
+                                        "f:type": {}
+                                    }
+                                },
+                                "f:startTime": {},
+                                "f:succeeded": {}
+                            }
+                        },
+                        "manager": "kube-controller-manager",
+                        "operation": "Update",
+                        "time": "2021-04-22T20:44:22Z"
+                    }
+                ],
+                "name": "parsec-ferret",
+                "namespace": "default",
+                "resourceVersion": "120691",
+                "selfLink": "/apis/batch/v1/namespaces/default/jobs/parsec-ferret",
+                "uid": "0ef384fa-f13a-4a0f-bfdb-d3ceef1c70fe"
+            },
+            "spec": {
+                "backoffLimit": 6,
+                "completions": 1,
+                "parallelism": 1,
+                "selector": {
+                    "matchLabels": {
+                        "controller-uid": "0ef384fa-f13a-4a0f-bfdb-d3ceef1c70fe"
+                    }
+                },
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "labels": {
+                            "controller-uid": "0ef384fa-f13a-4a0f-bfdb-d3ceef1c70fe",
+                            "job-name": "parsec-ferret"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "args": [
+                                    "-c",
+                                    "taskset -c 0-3 ./bin/parsecmgmt -a run -p ferret -i native -n 4"
+                                ],
+                                "command": [
+                                    "/bin/sh"
+                                ],
+                                "image": "anakli/parsec:ferret-native-reduced",
+                                "imagePullPolicy": "Always",
+                                "name": "parsecferret",
+                                "resources": {},
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File"
+                            }
+                        ],
+                        "dnsPolicy": "ClusterFirst",
+                        "nodeSelector": {
+                            "cca-project-nodetype": "node-b-4core"
+                        },
+                        "restartPolicy": "Never",
+                        "schedulerName": "default-scheduler",
+                        "securityContext": {},
+                        "terminationGracePeriodSeconds": 30
+                    }
+                }
+            },
+            "status": {
+                "completionTime": "2021-04-22T20:44:22Z",
+                "conditions": [
+                    {
+                        "lastProbeTime": "2021-04-22T20:44:22Z",
+                        "lastTransitionTime": "2021-04-22T20:44:22Z",
+                        "status": "True",
+                        "type": "Complete"
+                    }
+                ],
+                "startTime": "2021-04-22T20:38:02Z",
+                "succeeded": 1
+            }
+        },
+        {
+            "apiVersion": "batch/v1",
+            "kind": "Job",
+            "metadata": {
+                "creationTimestamp": "2021-04-22T20:38:02Z",
+                "labels": {
+                    "name": "pasec-freqmine"
+                },
+                "managedFields": [
+                    {
+                        "apiVersion": "batch/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {
+                            "f:metadata": {
+                                "f:labels": {
+                                    ".": {},
+                                    "f:name": {}
+                                }
+                            },
+                            "f:spec": {
+                                "f:backoffLimit": {},
+                                "f:completions": {},
+                                "f:parallelism": {},
+                                "f:template": {
+                                    "f:spec": {
+                                        "f:containers": {
+                                            "k:{\"name\":\"parsecfreqmine\"}": {
+                                                ".": {},
+                                                "f:args": {},
+                                                "f:command": {},
+                                                "f:image": {},
+                                                "f:imagePullPolicy": {},
+                                                "f:name": {},
+                                                "f:resources": {
+                                                    ".": {},
+                                                    "f:requests": {
+                                                        ".": {},
+                                                        "f:cpu": {}
+                                                    }
+                                                },
+                                                "f:terminationMessagePath": {},
+                                                "f:terminationMessagePolicy": {}
+                                            }
+                                        },
+                                        "f:dnsPolicy": {},
+                                        "f:nodeSelector": {
+                                            ".": {},
+                                            "f:cca-project-nodetype": {}
+                                        },
+                                        "f:restartPolicy": {},
+                                        "f:schedulerName": {},
+                                        "f:securityContext": {},
+                                        "f:terminationGracePeriodSeconds": {}
+                                    }
+                                }
+                            }
+                        },
+                        "manager": "kubectl-create",
+                        "operation": "Update",
+                        "time": "2021-04-22T20:38:02Z"
+                    },
+                    {
+                        "apiVersion": "batch/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {
+                            "f:status": {
+                                "f:completionTime": {},
+                                "f:conditions": {
+                                    ".": {},
+                                    "k:{\"type\":\"Complete\"}": {
+                                        ".": {},
+                                        "f:lastProbeTime": {},
+                                        "f:lastTransitionTime": {},
+                                        "f:status": {},
+                                        "f:type": {}
+                                    }
+                                },
+                                "f:startTime": {},
+                                "f:succeeded": {}
+                            }
+                        },
+                        "manager": "kube-controller-manager",
+                        "operation": "Update",
+                        "time": "2021-04-22T20:41:43Z"
+                    }
+                ],
+                "name": "parsec-freqmine",
+                "namespace": "default",
+                "resourceVersion": "120140",
+                "selfLink": "/apis/batch/v1/namespaces/default/jobs/parsec-freqmine",
+                "uid": "8a42140b-f0af-406f-8cc9-0f3534b5ea75"
+            },
+            "spec": {
+                "backoffLimit": 6,
+                "completions": 1,
+                "parallelism": 1,
+                "selector": {
+                    "matchLabels": {
+                        "controller-uid": "8a42140b-f0af-406f-8cc9-0f3534b5ea75"
+                    }
+                },
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "labels": {
+                            "controller-uid": "8a42140b-f0af-406f-8cc9-0f3534b5ea75",
+                            "job-name": "parsec-freqmine"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "args": [
+                                    "-c",
+                                    "taskset -c 0-2 ./bin/parsecmgmt -a run -p freqmine -i native -n 3"
+                                ],
+                                "command": [
+                                    "/bin/sh"
+                                ],
+                                "image": "anakli/parsec:freqmine-native-reduced",
+                                "imagePullPolicy": "Always",
+                                "name": "parsecfreqmine",
+                                "resources": {
+                                    "requests": {
+                                        "cpu": "2500m"
+                                    }
+                                },
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File"
+                            }
+                        ],
+                        "dnsPolicy": "ClusterFirst",
+                        "nodeSelector": {
+                            "cca-project-nodetype": "node-c-8core"
+                        },
+                        "restartPolicy": "Never",
+                        "schedulerName": "default-scheduler",
+                        "securityContext": {},
+                        "terminationGracePeriodSeconds": 30
+                    }
+                }
+            },
+            "status": {
+                "completionTime": "2021-04-22T20:41:43Z",
+                "conditions": [
+                    {
+                        "lastProbeTime": "2021-04-22T20:41:43Z",
+                        "lastTransitionTime": "2021-04-22T20:41:43Z",
+                        "status": "True",
+                        "type": "Complete"
+                    }
+                ],
+                "startTime": "2021-04-22T20:38:02Z",
+                "succeeded": 1
+            }
+        },
+        {
+            "apiVersion": "batch/v1",
+            "kind": "Job",
+            "metadata": {
+                "creationTimestamp": "2021-04-22T20:38:03Z",
+                "labels": {
+                    "name": "pasec-splash2x-fft"
+                },
+                "managedFields": [
+                    {
+                        "apiVersion": "batch/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {
+                            "f:metadata": {
+                                "f:labels": {
+                                    ".": {},
+                                    "f:name": {}
+                                }
+                            },
+                            "f:spec": {
+                                "f:backoffLimit": {},
+                                "f:completions": {},
+                                "f:parallelism": {},
+                                "f:template": {
+                                    "f:spec": {
+                                        "f:containers": {
+                                            "k:{\"name\":\"parsec-splash2x-fft\"}": {
+                                                ".": {},
+                                                "f:args": {},
+                                                "f:command": {},
+                                                "f:image": {},
+                                                "f:imagePullPolicy": {},
+                                                "f:name": {},
+                                                "f:resources": {
+                                                    ".": {},
+                                                    "f:requests": {
+                                                        ".": {},
+                                                        "f:cpu": {}
+                                                    }
+                                                },
+                                                "f:terminationMessagePath": {},
+                                                "f:terminationMessagePolicy": {}
+                                            }
+                                        },
+                                        "f:dnsPolicy": {},
+                                        "f:nodeSelector": {
+                                            ".": {},
+                                            "f:cca-project-nodetype": {}
+                                        },
+                                        "f:restartPolicy": {},
+                                        "f:schedulerName": {},
+                                        "f:securityContext": {},
+                                        "f:terminationGracePeriodSeconds": {}
+                                    }
+                                }
+                            }
+                        },
+                        "manager": "kubectl-create",
+                        "operation": "Update",
+                        "time": "2021-04-22T20:38:03Z"
+                    },
+                    {
+                        "apiVersion": "batch/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {
+                            "f:status": {
+                                "f:completionTime": {},
+                                "f:conditions": {
+                                    ".": {},
+                                    "k:{\"type\":\"Complete\"}": {
+                                        ".": {},
+                                        "f:lastProbeTime": {},
+                                        "f:lastTransitionTime": {},
+                                        "f:status": {},
+                                        "f:type": {}
+                                    }
+                                },
+                                "f:startTime": {},
+                                "f:succeeded": {}
+                            }
+                        },
+                        "manager": "kube-controller-manager",
+                        "operation": "Update",
+                        "time": "2021-04-22T20:43:30Z"
+                    }
+                ],
+                "name": "parsec-splash2x-fft",
+                "namespace": "default",
+                "resourceVersion": "120513",
+                "selfLink": "/apis/batch/v1/namespaces/default/jobs/parsec-splash2x-fft",
+                "uid": "79992cc5-8bac-4b52-8905-19f09a22b349"
+            },
+            "spec": {
+                "backoffLimit": 6,
+                "completions": 1,
+                "parallelism": 1,
+                "selector": {
+                    "matchLabels": {
+                        "controller-uid": "79992cc5-8bac-4b52-8905-19f09a22b349"
+                    }
+                },
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "labels": {
+                            "controller-uid": "79992cc5-8bac-4b52-8905-19f09a22b349",
+                            "job-name": "parsec-splash2x-fft"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "args": [
+                                    "-c",
+                                    "taskset -c 0-8 ./bin/parsecmgmt -a run -p splash2x.fft -i native -n 8"
+                                ],
+                                "command": [
+                                    "/bin/sh"
+                                ],
+                                "image": "anakli/parsec:splash2x-fft-native-reduced",
+                                "imagePullPolicy": "Always",
+                                "name": "parsec-splash2x-fft",
+                                "resources": {
+                                    "requests": {
+                                        "cpu": "6"
+                                    }
+                                },
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File"
+                            }
+                        ],
+                        "dnsPolicy": "ClusterFirst",
+                        "nodeSelector": {
+                            "cca-project-nodetype": "node-c-8core"
+                        },
+                        "restartPolicy": "Never",
+                        "schedulerName": "default-scheduler",
+                        "securityContext": {},
+                        "terminationGracePeriodSeconds": 30
+                    }
+                }
+            },
+            "status": {
+                "completionTime": "2021-04-22T20:43:30Z",
+                "conditions": [
+                    {
+                        "lastProbeTime": "2021-04-22T20:43:30Z",
+                        "lastTransitionTime": "2021-04-22T20:43:30Z",
+                        "status": "True",
+                        "type": "Complete"
+                    }
+                ],
+                "startTime": "2021-04-22T20:38:03Z",
+                "succeeded": 1
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": "",
+        "selfLink": ""
+    }
+}
