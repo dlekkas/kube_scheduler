@@ -83,3 +83,6 @@ done
 # stop agent
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${AGENT_NAME} \
 	--command="pkill -f mcperf"
+
+# generate plot
+python3 plot_q1.py --output ${RESULTS_DIR} --input-csv ${final_csv}
