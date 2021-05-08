@@ -1,7 +1,7 @@
 #!/bin/bash
 set -x
 
-ETH_ID="dilekkas"
+ETH_ID="kaiszhang"
 GROUP_NO="035"
 
 PROJ_ROOT_DIR=..
@@ -89,4 +89,4 @@ gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${MEMCACHED_NAME} \
 rm install_memcached.sh install_mcperf_dynamic.sh
 
 # spin up metrics server for monitoring utilization across kube nodes
-kubectl apply -f ${PROJ_ROOT_DIR}/metrics.yaml
+# kubectl apply -f ${PROJ_ROOT_DIR}/metrics.yaml

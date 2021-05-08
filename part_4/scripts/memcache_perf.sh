@@ -2,6 +2,7 @@
 
 ## Script for generating results for Question 4.2.1
 set -x
+set -e
 
 login_key=$HOME/.ssh/cloud-computing
 
@@ -48,7 +49,7 @@ for C in $( seq 1 ${max_cores} ); do
 			gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${MEMCACHED_NAME} \
 				--command="sudo sed -i '/^-t /c\-t ${T}' /etc/memcached.conf; \
 									 sudo systemctl restart memcached; sleep 10; \
-									 pidof memcached | xargs sudo taskset -pc 0-$((C-1))"
+									 pidof memcached | xargs sudo taskset -a -cp 0-$((C-1))"
 
 			# we need to load memcached with values everytime it is restarted since it
 			# only maintains data in memory and may be lost upon restarting the service
