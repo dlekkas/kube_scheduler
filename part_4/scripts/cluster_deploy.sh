@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+set -e
 
 ETH_ID="kaiszhang"
 GROUP_NO="035"
@@ -12,7 +12,7 @@ proj_id=cca-eth-2021-group-${GROUP_NO}
 # create a bucket in Google Cloud Storage (GCS) to store configuration only if
 # the bucket doesn't already exist
 bucket_id=gs://${proj_id}-${ETH_ID}/
-gsutil ls -b ${bucket_id} &> /dev/null || gsutil mb ${bucket_id}
+gsutil ls -b ${bucket_id} &>/dev/null || gsutil mb ${bucket_id}
 
 if [ ! -f ${login_key} ]; then
 	echo "Creating an ssh key to login to Kubernetes nodes..."
@@ -20,8 +20,8 @@ if [ ! -f ${login_key} ]; then
 fi
 
 export KOPS_STATE_STORE=${bucket_id}
-export PROJECT=`gcloud config get-value project`
-export KOPS_FEATURE_FLAGS=AlphaAllowGCE   # to unlock GCE features
+export PROJECT=$(gcloud config get-value project)
+export KOPS_FEATURE_FLAGS=AlphaAllowGCE # to unlock GCE features
 
 # create a kubernetes cluster based on the configuration file
 kops create -f ${PROJ_ROOT_DIR}/part4.yaml
@@ -40,6 +40,8 @@ kops validate cluster --wait 10m
 
 kubectl get nodes -o wide
 
+echo "\nConfiguring cluster..."
+
 cat <<EOF >install_mcperf_dynamic.sh
 #!/bin/bash
 sudo apt-get update
@@ -52,17 +54,19 @@ EOF
 chmod u+x install_mcperf_dynamic.sh
 
 sleep 20
-CLIENT_AGENT_NAME=`kubectl get nodes | grep client-agent | awk '{print $1}'`
+CLIENT_AGENT_NAME=$(kubectl get nodes | grep client-agent | awk '{print $1}')
+echo "Installing mcperf_dynamic on ${CLIENT_AGENT_NAME}..."
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_AGENT_NAME} \
-									 --zone=europe-west3-a --command='bash -s' < install_mcperf_dynamic.sh
+	--zone=europe-west3-a --command='bash -s' <install_mcperf_dynamic.sh
 
 sleep 20
-CLIENT_MEASURE_NAME=`kubectl get nodes | grep client-measure | awk '{print $1}'`
+CLIENT_MEASURE_NAME=$(kubectl get nodes | grep client-measure | awk '{print $1}')
+echo "Installing mcperf_dynamic on ${CLIENT_MEASURE_NAME}..."
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_MEASURE_NAME} \
-									 --zone=europe-west3-a --command='bash -s' < install_mcperf_dynamic.sh
+	--zone=europe-west3-a --command='bash -s' <install_mcperf_dynamic.sh
 
 sleep 20
-INTERNAL_MEMCACHED_IP=`kubectl get nodes -o wide| grep memcache-server | awk '{print $6}'`
+INTERNAL_MEMCACHED_IP=$(kubectl get nodes -o wide | grep memcache-server | awk '{print $6}')
 
 cat <<EOF >install_memcached.sh
 #!/bin/bash
@@ -82,9 +86,13 @@ sudo systemctl restart memcached
 EOF
 chmod u+x install_memcached.sh
 
-MEMCACHED_NAME=`kubectl get nodes | grep memcache-server | awk '{print $1}'`
+MEMCACHED_NAME=$(kubectl get nodes | grep memcache-server | awk '{print $1}')
+echo "Installing memcached on ${MEMCACHED_NAME}..."
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${MEMCACHED_NAME} \
-									 --zone=europe-west3-a --command='bash -s' < install_memcached.sh
+	--zone=europe-west3-a --command='bash -s' <install_memcached.sh
+echo "Adding user ubuntu to docker group..."
+gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${MEMCACHED_NAME} \
+	--zone=europe-west3-a --command='sudo usermod -a -G docker ubuntu'
 
 rm install_memcached.sh install_mcperf_dynamic.sh
 

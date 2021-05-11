@@ -28,8 +28,8 @@ INTERNAL_AGENT_IP=`kubectl get nodes -o wide | grep client-agent | awk '{print $
 CLIENT_MEASURE_NAME=`kubectl get nodes | grep client-measure | awk '{print $1}'`
 
 # initiate agent
-gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${AGENT_NAME} \
-	--command="./memcache-perf-dynamic/mcperf -T 16 -A > agent.dat" 2>/dev/null &
+# gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${AGENT_NAME} \
+# 	--command="./memcache-perf-dynamic/mcperf -T 16 -A > agent.dat" 2>/dev/null &
 
 # CSV that contains all the latencies of all runs and all different
 # combinations of threads and cores.
