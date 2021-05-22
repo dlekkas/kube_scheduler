@@ -54,7 +54,7 @@ func createSingleJob(ctx context.Context, job Job) {
 
 	out, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	io.Copy(os.Stdout, out)
@@ -64,7 +64,7 @@ func createSingleJob(ctx context.Context, job Job) {
 		Cmd:   command,
 	}, nil, nil, nil, job.name)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	log.Println("Created job", job.name)
@@ -90,16 +90,19 @@ func setContainerCpuAffinity(ctx context.Context, id string, cpuList CpuList) {
 			CpusetCpus: cpuList.String(),
 		},
 	}); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 }
 
 func setMemcachedCpuAffinity(cpuList CpuList) {
 	cmd := exec.Command("bash", "-c",
 		"pidof memcached | xargs sudo taskset -a -cp "+cpuList.String())
-	if err := cmd.Run(); err != nil {
-		panic(err)
+
+	stdoutStderr, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Fatal(err)
 	}
+	fmt.Printf("%s\n", stdoutStderr)
 }
 
 func (job *Job) SetCpuList(ctx context.Context, cpuList CpuList) {
@@ -134,7 +137,7 @@ func runScheduler(ctx context.Context, jobs []Job) {
 				// Start the job.
 				if err := cli.ContainerStart(ctx, nextJob.name,
 					types.ContainerStartOptions{}); err != nil {
-					panic(err)
+					log.Fatal(err)
 				}
 				runningJobs[nextJob.name] = nextJob
 				jobs = jobs[1:]
@@ -155,7 +158,7 @@ func runScheduler(ctx context.Context, jobs []Job) {
 		for jobName, job := range runningJobs {
 			res, err := cli.ContainerInspect(ctx, jobName)
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
 			if res.State.Status == "exited" {
 				// Job has completed.
@@ -229,7 +232,7 @@ func main() {
 	ctx := context.Background()
 	cli, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	jobs := []Job{
