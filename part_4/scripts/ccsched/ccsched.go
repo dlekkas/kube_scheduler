@@ -37,10 +37,21 @@ func main() {
 	}
 
 	cli := &controller.Controller{Client: dockerClient}
+	allJobs := []controller.JobInfo{
+		{Name: "blackscholes"},
+		{Name: "ferret"},
+		{Name: "freqmine"},
+		{Name: "dedup"},
+		{Name: "canneal"},
+		{Name: "splash2x-fft"},
+	}
+
+	// Remove any existing containers.
+	cli.RemoveContainers(ctx, allJobs)
 
 	var sched Scheduler = &scheduler.StaticScheduler{}
+	defer cli.RemoveContainers(ctx, allJobs)
 	sched.Init(ctx, cli)
-	defer cli.RemoveContainers(ctx, sched.JobInfos())
 	sched.Run(ctx, cli)
 	cli.WriteLogs(ctx, resultDir, sched.JobInfos())
 

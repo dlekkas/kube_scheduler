@@ -12,7 +12,7 @@ import (
 
 type StaticJob struct {
 	controller.JobInfo
-	cpuList controller.CpuList
+	// More fields here.
 }
 
 type StaticScheduler struct {
@@ -58,7 +58,7 @@ func (scheduler *StaticScheduler) Run(ctx context.Context, cli *controller.Contr
 			nextJob := scheduler.availableJobs[0]
 			if nextJob.Threads <= len(availableCpus) {
 				// Allocate the available cpu cores to the job.
-				cli.SetContainerCpuAffinity(ctx, nextJob.Name, availableCpus[:nextJob.Threads])
+				cli.SetJobCpuAffinity(ctx, &nextJob.JobInfo, availableCpus[:nextJob.Threads])
 				availableCpus = availableCpus[nextJob.Threads:]
 
 				// Start the job.
@@ -88,7 +88,7 @@ func (scheduler *StaticScheduler) Run(ctx context.Context, cli *controller.Contr
 			}
 			if res.State.Status == "exited" {
 				// Job has completed.
-				availableCpus = append(availableCpus, job.cpuList...)
+				availableCpus = append(availableCpus, job.CpuList...)
 				scheduler.completedJobs++
 				log.Println("Completed job", jobName)
 				delete(scheduler.runningJobs, jobName)

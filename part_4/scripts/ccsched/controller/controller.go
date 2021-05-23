@@ -24,6 +24,7 @@ type CpuList []int
 type JobInfo struct {
 	Name    string
 	Threads int
+	CpuList CpuList
 }
 
 func (cpuList CpuList) String() string {
@@ -48,12 +49,11 @@ func (cli *Controller) CreateSingleJob(ctx context.Context, job JobInfo) {
 	id := job.Name
 	imageName := fmt.Sprintf("anakli/parsec:%v-native-reduced", id)
 
-	out, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
+	_, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	io.Copy(os.Stdout, out)
 	command := getStartCommand(job)
 	_, err = cli.ContainerCreate(ctx, &container.Config{
 		Image: imageName,
@@ -81,7 +81,7 @@ func (cli *Controller) RemoveContainers(ctx context.Context, jobs []JobInfo) {
 
 }
 
-func (cli *Controller) SetContainerCpuAffinity(ctx context.Context, id string, cpuList CpuList) {
+func (cli *Controller) setContainerCpuAffinity(ctx context.Context, id string, cpuList CpuList) {
 	if _, err := cli.ContainerUpdate(ctx, id, container.UpdateConfig{
 		Resources: container.Resources{
 			CpusetCpus: cpuList.String(),
@@ -89,7 +89,12 @@ func (cli *Controller) SetContainerCpuAffinity(ctx context.Context, id string, c
 	}); err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("Job %v running on cpu %v", id, cpuList)
+}
+
+func (cli *Controller) SetJobCpuAffinity(ctx context.Context, job *JobInfo, cpuList CpuList) {
+	cli.setContainerCpuAffinity(ctx, job.Name, cpuList)
+	job.CpuList = cpuList
+	log.Printf("Job %v running on cpu %v", job.Name, cpuList)
 }
 
 func (cli *Controller) SetMemcachedCpuAffinity(cpuList CpuList) {
@@ -100,12 +105,13 @@ func (cli *Controller) SetMemcachedCpuAffinity(cpuList CpuList) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("%s\n", stdoutStderr)
+	log.Printf("%s\n", stdoutStderr)
+	log.Printf("memcached running on cpu %v", cpuList)
 }
 
 func (cli *Controller) WriteLogs(ctx context.Context, resultDir string, jobs []JobInfo) {
 	logPath := path.Join(resultDir, "logs")
-	_ = os.Mkdir(logPath, 0755)
+	_ = os.MkdirAll(logPath, 0755)
 	for _, job := range jobs {
 		id := job.Name
 		reader, err := cli.ContainerLogs(ctx, id, types.ContainerLogsOptions{
@@ -131,7 +137,7 @@ func (cli *Controller) WriteLogs(ctx context.Context, resultDir string, jobs []J
 	}
 
 	infoPath := path.Join(resultDir, "info")
-	_ = os.Mkdir(infoPath, 0755)
+	_ = os.MkdirAll(infoPath, 0755)
 	for _, job := range jobs {
 		id := job.Name
 		_, info, err := cli.ContainerInspectWithRaw(ctx, id, false)

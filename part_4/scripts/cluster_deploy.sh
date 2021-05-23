@@ -86,6 +86,18 @@ sudo systemctl restart memcached
 EOF
 chmod u+x install_memcached.sh
 
+cat <<EOF >pull_parsec_images.sh
+#!/bin/bash
+# Pull all docker images beforehand.
+anakli/parsec:splash2x-fft-native-reduced 
+anakli/parsec:freqmine-native-reduced
+anakli/parsec:ferret-native-reduced
+anakli/parsec:canneal-native-reduced
+anakli/parsec:dedup-native-reduced
+anakli/parsec:blackscholes-native-reduced
+EOF
+chmod u+x pull_parsec_images.sh
+
 MEMCACHED_NAME=$(kubectl get nodes | grep memcache-server | awk '{print $1}')
 echo "Installing memcached on ${MEMCACHED_NAME}..."
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${MEMCACHED_NAME} \
@@ -94,7 +106,11 @@ echo "Adding user ubuntu to docker group..."
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${MEMCACHED_NAME} \
 	--zone=europe-west3-a --command='sudo usermod -a -G docker ubuntu'
 
-rm install_memcached.sh install_mcperf_dynamic.sh
+echo "Pulling all PARSEC images..."
+gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${MEMCACHED_NAME} \
+	--zone=europe-west3-a --command='bash -s' <pull_parsec_images.sh
+
+rm install_memcached.sh install_mcperf_dynamic.sh pull_parsec_images.sh
 
 # spin up metrics server for monitoring utilization across kube nodes
 # kubectl apply -f ${PROJ_ROOT_DIR}/metrics.yaml
