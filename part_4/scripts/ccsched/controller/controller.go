@@ -67,6 +67,24 @@ func (cli *Controller) CreateSingleJob(ctx context.Context, job JobInfo) {
 
 }
 
+func (cli *Controller) PauseJob(ctx context.Context, job JobInfo) {
+	id := job.Name
+	if err := cli.ContainerPause(ctx, id); err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println("Paused job", id)
+}
+
+func (cli *Controller) UnpauseJob(ctx context.Context, job JobInfo) {
+	id := job.Name
+	if err := cli.ContainerUnpause(ctx, id); err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println("Unpaused job", id)
+}
+
 // Stops and remove the jobs in the job list.
 func (cli *Controller) RemoveContainers(ctx context.Context, jobs []JobInfo) {
 	for _, job := range jobs {
@@ -81,18 +99,14 @@ func (cli *Controller) RemoveContainers(ctx context.Context, jobs []JobInfo) {
 
 }
 
-func (cli *Controller) setContainerCpuAffinity(ctx context.Context, id string, cpuList CpuList) {
-	if _, err := cli.ContainerUpdate(ctx, id, container.UpdateConfig{
+func (cli *Controller) SetJobCpuAffinity(ctx context.Context, job *JobInfo, cpuList CpuList) {
+	if _, err := cli.ContainerUpdate(ctx, job.Name, container.UpdateConfig{
 		Resources: container.Resources{
 			CpusetCpus: cpuList.String(),
 		},
 	}); err != nil {
 		log.Fatal(err)
 	}
-}
-
-func (cli *Controller) SetJobCpuAffinity(ctx context.Context, job *JobInfo, cpuList CpuList) {
-	cli.setContainerCpuAffinity(ctx, job.Name, cpuList)
 	job.CpuList = cpuList
 	log.Printf("Job %v running on cpu %v", job.Name, cpuList)
 }

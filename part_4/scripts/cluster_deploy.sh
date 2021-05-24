@@ -14,9 +14,12 @@ proj_id=cca-eth-2021-group-${GROUP_NO}
 bucket_id=gs://${proj_id}-${ETH_ID}/
 gsutil ls -b ${bucket_id} &>/dev/null || gsutil mb ${bucket_id}
 
+# modify part4.yaml bucket id.
+perl -i -pe "s/(?<= configBase: gs:\/\/${proj_id}-).*(?=\/part4.k8s.local)/${ETH_ID}/" ../part4.yaml
+
 if [ ! -f ${login_key} ]; then
-	echo "Creating an ssh key to login to Kubernetes nodes..."
-	ssh-keygen -t rsa -b 4096 -f cloud-computing
+  echo "Creating an ssh key to login to Kubernetes nodes..."
+  ssh-keygen -t rsa -b 4096 -f cloud-computing
 fi
 
 export KOPS_STATE_STORE=${bucket_id}
@@ -57,13 +60,13 @@ sleep 20
 CLIENT_AGENT_NAME=$(kubectl get nodes | grep client-agent | awk '{print $1}')
 echo "Installing mcperf_dynamic on ${CLIENT_AGENT_NAME}..."
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_AGENT_NAME} \
-	--zone=europe-west3-a --command='bash -s' <install_mcperf_dynamic.sh
+  --zone=europe-west3-a --command='bash -s' <install_mcperf_dynamic.sh
 
 sleep 20
 CLIENT_MEASURE_NAME=$(kubectl get nodes | grep client-measure | awk '{print $1}')
 echo "Installing mcperf_dynamic on ${CLIENT_MEASURE_NAME}..."
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_MEASURE_NAME} \
-	--zone=europe-west3-a --command='bash -s' <install_mcperf_dynamic.sh
+  --zone=europe-west3-a --command='bash -s' <install_mcperf_dynamic.sh
 
 sleep 20
 INTERNAL_MEMCACHED_IP=$(kubectl get nodes -o wide | grep memcache-server | awk '{print $6}')
@@ -101,14 +104,14 @@ chmod u+x pull_parsec_images.sh
 MEMCACHED_NAME=$(kubectl get nodes | grep memcache-server | awk '{print $1}')
 echo "Installing memcached on ${MEMCACHED_NAME}..."
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${MEMCACHED_NAME} \
-	--zone=europe-west3-a --command='bash -s' <install_memcached.sh
+  --zone=europe-west3-a --command='bash -s' <install_memcached.sh
 echo "Adding user ubuntu to docker group..."
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${MEMCACHED_NAME} \
-	--zone=europe-west3-a --command='sudo usermod -a -G docker ubuntu'
+  --zone=europe-west3-a --command='sudo usermod -a -G docker ubuntu'
 
 echo "Pulling all PARSEC images..."
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${MEMCACHED_NAME} \
-	--zone=europe-west3-a --command='bash -s' <pull_parsec_images.sh
+  --zone=europe-west3-a --command='bash -s' <pull_parsec_images.sh
 
 rm install_memcached.sh install_mcperf_dynamic.sh pull_parsec_images.sh
 
