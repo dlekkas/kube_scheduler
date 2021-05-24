@@ -115,12 +115,10 @@ func (cli *Controller) SetMemcachedCpuAffinity(cpuList CpuList) {
 	cmd := exec.Command("bash", "-c",
 		"pidof memcached | xargs sudo taskset -a -cp "+cpuList.String())
 
-	stdoutStderr, err := cmd.CombinedOutput()
-	if err != nil {
+	if err := cmd.Run(); err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("%s\n", stdoutStderr)
-	log.Printf("memcached running on cpu %v", cpuList)
+	log.Println("memcached running on cpu", cpuList)
 }
 
 func (cli *Controller) WriteLogs(ctx context.Context, resultDir string, jobs []JobInfo) {
