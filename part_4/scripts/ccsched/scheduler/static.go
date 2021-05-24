@@ -10,15 +10,10 @@ import (
 	"github.com/shirou/gopsutil/v3/cpu"
 )
 
-type StaticJob struct {
-	controller.JobInfo
-	// More fields here.
-}
-
 type StaticScheduler struct {
 	jobInfos      []controller.JobInfo
-	availableJobs []StaticJob
-	runningJobs   map[string]StaticJob
+	availableJobs []controller.JobInfo
+	runningJobs   map[string]controller.JobInfo
 	completedJobs int
 }
 
@@ -39,10 +34,10 @@ func (scheduler *StaticScheduler) Init(ctx context.Context, cli *controller.Cont
 	// Make all the jobs ready to run.
 	for _, job := range scheduler.jobInfos {
 		cli.CreateSingleJob(ctx, job)
-		scheduler.availableJobs = append(scheduler.availableJobs, StaticJob{JobInfo: job})
+		scheduler.availableJobs = append(scheduler.availableJobs, job)
 	}
 
-	scheduler.runningJobs = make(map[string]StaticJob)
+	scheduler.runningJobs = make(map[string]controller.JobInfo)
 	scheduler.completedJobs = 0
 }
 
@@ -58,7 +53,7 @@ func (scheduler *StaticScheduler) Run(ctx context.Context, cli *controller.Contr
 			nextJob := scheduler.availableJobs[0]
 			if nextJob.Threads <= len(availableCpus) {
 				// Allocate the available cpu cores to the job.
-				cli.SetJobCpuAffinity(ctx, &nextJob.JobInfo, availableCpus[:nextJob.Threads])
+				cli.SetJobCpuAffinity(ctx, &nextJob, availableCpus[:nextJob.Threads])
 				availableCpus = availableCpus[nextJob.Threads:]
 
 				// Start the job.
