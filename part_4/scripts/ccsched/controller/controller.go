@@ -15,6 +15,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/stdcopy"
 )
 
 type Controller struct {
@@ -140,22 +141,30 @@ func (cli *Controller) WriteLogs(ctx context.Context, resultDir string, jobs []J
 		id := job.Name
 		reader, err := cli.ContainerLogs(ctx, id, types.ContainerLogsOptions{
 			ShowStdout: true,
+			ShowStderr: true,
 		})
 		if err != nil {
 			log.Printf("Error getting logs for %v: %v", id, err)
 			continue
 		}
 
-		fLog, err := os.Create(path.Join(logPath, id+".out"))
+		foutLog, err := os.Create(path.Join(logPath, id+".stdout"))
 		if err != nil {
-			log.Printf("Error creating logs file for %v: %v", id, err)
+			log.Printf("Error creating stdout logs file for %v: %v", id, err)
 			continue
 		}
-		defer fLog.Close()
+		defer foutLog.Close()
 
-		_, err = io.Copy(fLog, reader)
+		ferrLog, err := os.Create(path.Join(logPath, id+".stderr"))
+		if err != nil {
+			log.Printf("Error creating stderr logs file for %v: %v", id, err)
+			continue
+		}
+		defer ferrLog.Close()
+
+		_, err = stdcopy.StdCopy(foutLog, ferrLog, reader)
 		if err != nil && err != io.EOF {
-			log.Printf("Error writing logs for %v: %v", id, err)
+			log.Printf("Error writing container logs for %v: %v", id, err)
 			continue
 		}
 	}
