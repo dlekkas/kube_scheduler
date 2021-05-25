@@ -31,12 +31,12 @@ type MC1Scheduler struct {
 
 func (s *MC1Scheduler) Init(ctx context.Context, cli *controller.Controller) {
 	s.jobs = map[string]*controller.JobInfo{
-		"ferret":       {Name: "ferret", Threads: 3, Eta: 320 * time.Second},
-		"freqmine":     {Name: "freqmine", Threads: 3, Eta: 200 * time.Second},
-		"blackscholes": {Name: "blackscholes", Threads: 2, Eta: 90 * time.Second},
-		"splash2x-fft": {Name: "splash2x-fft", Threads: 2, Eta: 110 * time.Second},
-		"dedup":        {Name: "dedup", Threads: 1, Eta: 55 * time.Second},
-		"canneal":      {Name: "canneal", Threads: 1, Eta: 165 * time.Second},
+		"ferret":       {Name: "ferret", Threads: 2, Eta: 400 * time.Second},
+		"freqmine":     {Name: "freqmine", Threads: 2, Eta: 270 * time.Second},
+		"blackscholes": {Name: "blackscholes", Threads: 2, Eta: 150 * time.Second},
+		"splash2x-fft": {Name: "splash2x-fft", Threads: 2, Eta: 120 * time.Second},
+		"dedup":        {Name: "dedup", Threads: 1, Eta: 60 * time.Second},
+		"canneal":      {Name: "canneal", Threads: 1, Eta: 280 * time.Second},
 	}
 
 	s.createdJobs = make(map[string]bool)
@@ -84,25 +84,8 @@ func (s *MC1Scheduler) Run(ctx context.Context, cli *controller.Controller) {
 			s.mc1core = true
 		}
 
-		// Schedule jobs.
-		// First we look at the case where cpu1 is made available because memcached is under light load.
-		// We try to schedule the heavy jobs first to keep all cpus utilized
+		// Schedule jobs based on available cpus, favoring ones that are expected to finish earlier.
 		cpuJobs := s.getCpuJobs()
-		if len(cpuJobs[1]) == 0 {
-			if _, ok := s.runningJobs["freqmine"]; ok {
-				cli.SetJobCpuAffinity(ctx, s.jobs["freqmine"], controller.CpuList{1, 2, 3})
-			} else if _, ok := s.runningJobs["ferret"]; ok {
-				cli.SetJobCpuAffinity(ctx, s.jobs["ferret"], controller.CpuList{1, 2, 3})
-			} else {
-				// Both freqmine and ferret are not running.
-				_ = s.prioritizeCpuIntensiveJobs(ctx, cli, s.jobs["freqmine"]) ||
-					s.prioritizeCpuIntensiveJobs(ctx, cli, s.jobs["ferret"])
-			}
-		}
-
-		// Now we schedule the rest of the jobs based on available cpus,
-		// favoring ones that are expected to finish earlier, and co-locate if possible.
-		cpuJobs = s.getCpuJobs()
 		availCpus := make([]int, 0, ncpu)
 		// Favor cpu2, cpu3 because jobs are less likely to be paused.
 		for core := ncpu - 1; core >= 1; core-- {
@@ -111,9 +94,7 @@ func (s *MC1Scheduler) Run(ctx context.Context, cli *controller.Controller) {
 			}
 		}
 
-		// Handle single- and multi-threaded jobs separately.
-		// Note that if there are 3 cores available here, then freqmine and ferret are finished,
-		// otherwise they would have been scheduled by the prioritizeCpuIntensiveJobs policy.
+		// Handle single- and double-threaded jobs separately.
 		availJobs1, availJobs2 := s.populateAvailableJobs()
 		if len(availCpus) >= 2 && len(availJobs2) > 0 {
 			job := availJobs2[0]
@@ -125,22 +106,11 @@ func (s *MC1Scheduler) Run(ctx context.Context, cli *controller.Controller) {
 
 		for len(availCpus) > 0 && len(availJobs1) > 0 {
 			job := availJobs1[0]
-			cpuToSchedule := availCpus[:1]
-			cli.SetJobCpuAffinity(ctx, job, cpuToSchedule)
+			cli.SetJobCpuAffinity(ctx, job, availCpus[:1])
 			s.startOrUnpauseJob(ctx, cli, job)
 			availCpus = availCpus[1:]
 			availJobs1 = availJobs1[1:]
-			if len(availCpus) == 0 && len(availJobs1) > 0 {
-				// The two single-threaded jobs (dedup, canneal) can be colocated
-				// if there are not enough cpu cores.
-				colocateJob := availJobs1[0]
-				cli.SetJobCpuAffinity(ctx, colocateJob, cpuToSchedule)
-				s.startOrUnpauseJob(ctx, cli, colocateJob)
-				availJobs1 = availJobs1[1:]
-			}
 		}
-
-		// TODO: Maybe assign jobs with 2 threads to 1 cpu to improve utilization.
 
 		// Check for completed jobs.
 		for id := range s.runningJobs {
@@ -157,25 +127,6 @@ func (s *MC1Scheduler) Run(ctx context.Context, cli *controller.Controller) {
 		}
 
 	}
-}
-
-// Prioritize cpu intensive jobs (ferret, freqmine) assuming that they are not already running.
-// Pause all other jobs. If both are finished, then the function will return false.
-func (s *MC1Scheduler) prioritizeCpuIntensiveJobs(ctx context.Context, cli *controller.Controller,
-	job *controller.JobInfo) bool {
-	_, jobCreated := s.createdJobs[job.Name]
-	_, jobPaused := s.pausedJobs[job.Name]
-
-	if !jobCreated && !jobPaused {
-		// Nothing to prioritize.
-		return false
-	}
-	for id := range s.runningJobs {
-		s.pauseJob(ctx, cli, s.jobs[id])
-	}
-	cli.SetJobCpuAffinity(ctx, job, controller.CpuList{1, 2, 3})
-	s.startOrUnpauseJob(ctx, cli, job)
-	return true
 }
 
 // Find all available jobs and categorize them into single or multi-threaded jobs sorted by ETA.
@@ -222,7 +173,7 @@ func (s *MC1Scheduler) pauseJob(ctx context.Context, cli *controller.Controller,
 	if err := cli.PauseJob(ctx, id); err != nil {
 		log.Printf("Error pausing job %v: %v", id, err)
 	} else {
-		elapsedTime := time.Now().Sub(job.LastUnpaused)
+		elapsedTime := time.Since(job.LastUnpaused)
 		if elapsedTime > job.Eta {
 			log.Println("ETA underestimated for job", job.Name)
 			job.Eta = 15
