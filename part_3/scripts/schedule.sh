@@ -32,14 +32,14 @@ for i in $( seq 1 ${n_reps} ); do
 
 	# initiate agent A
 	gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${AGENT_A_NAME} \
-		--command="./memcache-perf/mcperf -T 2 -A > agent.dat" 2>/dev/null &
+		--zone=europe-west3-a --command="./memcache-perf/mcperf -T 2 -A > agent.dat" 2>/dev/null &
 	# initiate agent B
 	gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${AGENT_B_NAME} \
-		--command="./memcache-perf/mcperf -T 4 -A > agent.dat" 2>/dev/null &
+		--zone=europe-west3-a --command="./memcache-perf/mcperf -T 4 -A > agent.dat" 2>/dev/null &
 
 	MEMCACHED_IP=`kubectl get pods -o wide | grep memcached | awk '{print $6}'`
 	gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_MEASURE_NAME} \
-		--command="./memcache-perf/mcperf -s ${MEMCACHED_IP} --loadonly"
+		--zone=europe-west3-a --command="./memcache-perf/mcperf -s ${MEMCACHED_IP} --loadonly"
 
 	res_dir=${RESULTS_DIR}/rep_${i}
 	mkdir -p ${res_dir}
@@ -51,9 +51,9 @@ for i in $( seq 1 ${n_reps} ); do
 	# periodically every 20 sec
 	measure_res=memcached_latencies.dat
 	gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_MEASURE_NAME} \
-		--command="./memcache-perf/mcperf -s ${MEMCACHED_IP} -a ${AGENT_A_INTERNAL_IP} \
-							-a ${AGENT_B_INTERNAL_IP} --noload -T 6 -C 4 -D 4 -Q 1000 -c 4 -t 20 \
-							--scan 30000:30300:10 > ${measure_res}"&
+		--zone=europe-west3-a --command="./memcache-perf/mcperf -s ${MEMCACHED_IP} \
+					 		-a ${AGENT_A_INTERNAL_IP} -a ${AGENT_B_INTERNAL_IP} --noload -T 6 \
+							-C 4 -D 4 -Q 1000 -c 4 -t 20 --scan 30000:30300:10 > ${measure_res}"&
 	current_ts=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
 
 	# allow for memcached load to warm-up
@@ -73,12 +73,12 @@ for i in $( seq 1 ${n_reps} ); do
 																		> ${res_dir}/output/${parsec_job}.out
 	done
 
-	gcloud compute scp --ssh-key-file=${login_key} \
+	gcloud compute scp --ssh-key-file=${login_key} --zone=europe-west3-a \
 				ubuntu@${CLIENT_MEASURE_NAME}:~/${measure_res} ${res_dir} >/dev/null
 
-	kubectl get jobs -o json > ${res_dir}/job_results.json
-	python3 get_time.py ${res_dir}/job_results.json > ${res_dir}/job_times.txt
-	python3 get_time_v2.py ${res_dir}/job_results.json ${current_ts} > \
+	kubectl get pods -o json > ${res_dir}/job_results.json
+	python3 get_time_x.py ${res_dir}/job_results.json > ${res_dir}/job_times.txt
+	python3 get_time_xx.py ${res_dir}/job_results.json ${current_ts} > \
 												 ${res_dir}/job_results.csv
 
 	# kill all spawned jobs
@@ -89,14 +89,14 @@ for i in $( seq 1 ${n_reps} ); do
 
 	# stop agent A
 	gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${AGENT_A_NAME} \
-			--command="pkill -f mcperf"
+		--zone=europe-west3-a --command="pkill -f mcperf"
 	# stop agent B
 	gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${AGENT_B_NAME} \
-			--command="pkill -f mcperf"
+		--zone=europe-west3-a --command="pkill -f mcperf"
 
 	# stop memcached load
 	gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_MEASURE_NAME} \
-			--command="pkill -f mcperf"
+		--zone=europe-west3-a --command="pkill -f mcperf"
 
 	kubectl delete service ${memcached_name}
 	kubectl delete pods memcached-pt3

@@ -32,9 +32,19 @@ Transpose: iter_num = 20971520
 Transpose: iter_num = 25165824
 Transpose: iter_num = 29360128
 FFt1DOnce: iter_num = 114688
-Step 1:  5985350
-Step 2:  9681756
+Step 1:  4056938
+Step 2:  8958629
 Transpose: iter_num = 0
+Transpose: iter_num = 4194304
+Transpose: iter_num = 8388608
+Transpose: iter_num = 12582912
+Transpose: iter_num = 20971520
+Transpose: iter_num = 16777216
+Transpose: iter_num = 25165824
+Transpose: iter_num = 29360128
+Step 3:  1644730
+Transpose: iter_num = 0
+Step 4:  8451422
 Transpose: iter_num = 4194304
 Transpose: iter_num = 8388608
 Transpose: iter_num = 12582912
@@ -42,36 +52,26 @@ Transpose: iter_num = 16777216
 Transpose: iter_num = 20971520
 Transpose: iter_num = 25165824
 Transpose: iter_num = 29360128
-Step 3:  1543274
-Step 4:  9107786
-Transpose: iter_num = 0
-Transpose: iter_num = 4194304
-Transpose: iter_num = 8388608
-Transpose: iter_num = 12582912
-Transpose: iter_num = 16777216
-Transpose: iter_num = 20971520
-Transpose: iter_num = 25165824
-Transpose: iter_num = 29360128
-Step 5:  1214470
+Step 5:  1097893
 
                  PROCESS STATISTICS
             Computation      Transpose     Transpose
  Proc          Time            Time        Fraction
-    0          27614889        8743094       0.31661
+    0          24250783        6799561       0.28039
 
                  TIMING INFORMATION
-Start time                        : 1619124147801414
-Initialization finish time        : 1619124182548827
-Overall finish time               : 1619124210163716
-Total time with initialization    :         62362302
-Total time without initialization :         27614889
-Overall transpose time            :          8743094
-Overall transpose fraction        :          0.31661
+Start time                        : 1621942472825309
+Initialization finish time        : 1621942504588998
+Overall finish time               : 1621942528839781
+Total time with initialization    :         56014472
+Total time without initialization :         24250783
+Overall transpose time            :          6799561
+Overall transpose fraction        :          0.28039
 
 
-real	1m3.019s
-user	3m33.231s
-sys	0m41.251s
+real	0m56.521s
+user	3m20.188s
+sys	0m25.541s
 [PARSEC] [----------    End of output    ----------]
 [PARSEC]
 [PARSEC] BIBLIOGRAPHY

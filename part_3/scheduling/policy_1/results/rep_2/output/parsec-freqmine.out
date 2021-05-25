@@ -27,11 +27,11 @@ transaction number is 250000
 311877
 17498
 269
-the data preparation cost 2.840077 seconds, the FPgrowth cost 215.217249 seconds
+the data preparation cost 2.113176 seconds, the FPgrowth cost 190.291188 seconds
 
-real	3m38.071s
-user	10m43.416s
-sys	0m3.816s
+real	3m12.415s
+user	9m29.697s
+sys	0m1.592s
 [PARSEC] [----------    End of output    ----------]
 [PARSEC]
 [PARSEC] BIBLIOGRAPHY

@@ -1,13 +1,13 @@
-Job:  parsec-blackscholes
-Job time:  0:04:12
-Job:  parsec-canneal
-Job time:  0:04:23
-Job:  parsec-dedup
-Job time:  0:01:54
-Job:  parsec-ferret
-Job time:  0:06:20
-Job:  parsec-freqmine
-Job time:  0:03:41
-Job:  parsec-splash2x-fft
-Job time:  0:05:27
-Total time: 0:06:21
+Job:  blackscholes
+Job time:  0:03:34
+Job:  canneal
+Job time:  0:03:29
+Job:  dedup
+Job time:  0:01:34
+Job:  ferret
+Job time:  0:05:55
+Job:  freqmine
+Job time:  0:03:18
+Job:  splash2x
+Job time:  0:00:57
+Total time: 0:05:56

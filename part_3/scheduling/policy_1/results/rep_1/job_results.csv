@@ -1,7 +1,7 @@
 job,start_time,total_time
-blackscholes,10,254
-canneal,12,270
-dedup,11,129
-ferret,11,379
-freqmine,11,221
-splash2x,12,337
+blackscholes,13,219
+canneal,23,203
+dedup,14,92
+ferret,14,355
+freqmine,20,189
+splash2x,230,55

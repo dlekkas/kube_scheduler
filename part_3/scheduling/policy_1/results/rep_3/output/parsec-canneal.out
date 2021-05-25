@@ -40,11 +40,11 @@ Just saw element: 2300000
 Just saw element: 2400000
 Just saw element: 2500000
 netlist created. 2500000 elements.
-Final routing is: 9.03331e+09
+Final routing is: 9.03383e+09
 
-real	4m13.338s
-user	8m47.536s
-sys	0m2.680s
+real	3m28.961s
+user	7m19.492s
+sys	0m1.234s
 [PARSEC] [----------    End of output    ----------]
 [PARSEC]
 [PARSEC] BIBLIOGRAPHY

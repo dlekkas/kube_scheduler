@@ -7,6 +7,7 @@ GROUP_NO="035"
 PROJ_ROOT_DIR=..
 
 login_key=$HOME/.ssh/cloud-computing
+gcloud_id=cca-eth-2021-group-${GROUP_NO}
 proj_id=cca-eth-2021-group-${GROUP_NO}-${ETH_ID}
 
 # create a bucket in Google Cloud Storage (GCS) to store configuration only if
@@ -22,7 +23,7 @@ fi
 sed -i "s/<your-gs-bucket>/${proj_id}/g" ${PROJ_ROOT_DIR}/part3.yaml
 
 export KOPS_STATE_STORE=${bucket_id}
-export PROJECT=`gcloud config get-value project`
+export PROJECT=${gcloud_id}
 export KOPS_FEATURE_FLAGS=AlphaAllowGCE   # to unlock GCE features
 
 # create a kubernetes cluster based on the configuration file
@@ -60,17 +61,20 @@ chmod u+x compile_mcperf.sh
 sleep 20
 CLIENT_AGENT_A_NAME=`kubectl get nodes | grep client-agent-a | awk '{print $1}'`
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_AGENT_A_NAME} \
-									 --zone=europe-west3-a --command='bash -s' < compile_mcperf.sh
+									 --zone=europe-west3-a --project=${gcloud_id} \
+									 --command='bash -s' < compile_mcperf.sh
 
 sleep 20
 CLIENT_AGENT_B_NAME=`kubectl get nodes | grep client-agent-b | awk '{print $1}'`
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_AGENT_B_NAME} \
-									 --zone=europe-west3-a --command='bash -s' < compile_mcperf.sh
+									 --zone=europe-west3-a --project=${gcloud_id} \
+									 --command='bash -s' < compile_mcperf.sh
 
 sleep 20
 CLIENT_MEASURE_NAME=`kubectl get nodes | grep client-measure | awk '{print $1}'`
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${CLIENT_MEASURE_NAME} \
-									 --zone=europe-west3-a --command='bash -s' < compile_mcperf.sh
+									 --zone=europe-west3-a --project=${gcloud_id} \
+									 --command='bash -s' < compile_mcperf.sh
 
 rm compile_mcperf.sh
 

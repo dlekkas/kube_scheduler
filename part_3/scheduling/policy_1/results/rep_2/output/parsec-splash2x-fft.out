@@ -32,9 +32,9 @@ Transpose: iter_num = 20971520
 Transpose: iter_num = 25165824
 Transpose: iter_num = 29360128
 FFt1DOnce: iter_num = 114688
-Step 1:  5304785
+Step 1:  3984845
 Transpose: iter_num = 0
-Step 2:  9915265
+Step 2:  8955183
 Transpose: iter_num = 4194304
 Transpose: iter_num = 8388608
 Transpose: iter_num = 12582912
@@ -42,8 +42,8 @@ Transpose: iter_num = 16777216
 Transpose: iter_num = 20971520
 Transpose: iter_num = 25165824
 Transpose: iter_num = 29360128
-Step 3:  1896719
-Step 4:  8979558
+Step 3:  1517117
+Step 4:  8346223
 Transpose: iter_num = 0
 Transpose: iter_num = 4194304
 Transpose: iter_num = 8388608
@@ -52,26 +52,26 @@ Transpose: iter_num = 16777216
 Transpose: iter_num = 20971520
 Transpose: iter_num = 25165824
 Transpose: iter_num = 29360128
-Step 5:  1137744
+Step 5:  1078162
 
                  PROCESS STATISTICS
             Computation      Transpose     Transpose
  Proc          Time            Time        Fraction
-    0          27259274        8339248       0.30592
+    0          23947183        6580124       0.27478
 
                  TIMING INFORMATION
-Start time                        : 1619123642755652
-Initialization finish time        : 1619123678004782
-Overall finish time               : 1619123705264056
-Total time with initialization    :         62508404
-Total time without initialization :         27259274
-Overall transpose time            :          8339248
-Overall transpose fraction        :          0.30592
+Start time                        : 1621941930144055
+Initialization finish time        : 1621941959977851
+Overall finish time               : 1621941983925034
+Total time with initialization    :         53780979
+Total time without initialization :         23947183
+Overall transpose time            :          6580124
+Overall transpose fraction        :          0.27478
 
 
-real	1m3.165s
-user	3m33.436s
-sys	0m36.806s
+real	0m54.271s
+user	3m18.381s
+sys	0m24.181s
 [PARSEC] [----------    End of output    ----------]
 [PARSEC]
 [PARSEC] BIBLIOGRAPHY
