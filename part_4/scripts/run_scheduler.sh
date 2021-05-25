@@ -44,7 +44,7 @@ gcloud compute ssh --ssh-key-file=${login_key} --zone=europe-west3-a ubuntu@${AG
 
 # Compile the scheduler
 cd ccsched
-SCHEDULER_NAME=scheduler
+SCHEDULER_NAME=ccsched
 go mod tidy
 env GOOS=linux GOARCH=amd64 go build -o build/${SCHEDULER_NAME}
 gcloud compute scp --ssh-key-file=${login_key} \
@@ -71,14 +71,15 @@ for i in $(seq 1 ${n_reps}); do
   measure_pid=$!
 
   # Run the scheduler.
-  parsec_res=parsec
+  current_ts=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
+  scheduler_res="scheduler_${current_ts}"
   gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${MEMCACHED_NAME} \
-    --command="./${SCHEDULER_NAME} ${parsec_res}"
+    --command="./${SCHEDULER_NAME} ${scheduler_res}"
 
   # Copy scheduler results to host machine
   gcloud compute scp --ssh-key-file=${login_key} \
-    ubuntu@${MEMCACHED_NAME}:~/${parsec_res} \
-    ${res_dir}/${parsec_res} >/dev/null
+    ubuntu@${MEMCACHED_NAME}:~/${scheduler_res} \
+    ${res_dir}/${scheduler_res} >/dev/null
 
   # Wait for the measurement to finish.
   wait $measure_pid

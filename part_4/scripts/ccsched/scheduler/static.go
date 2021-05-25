@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"ethz.ch/ccsched/controller"
-	"github.com/docker/docker/api/types"
 	"github.com/shirou/gopsutil/v3/cpu"
 )
 
@@ -33,7 +32,7 @@ func (scheduler *StaticScheduler) Init(ctx context.Context, cli *controller.Cont
 
 	// Make all the jobs ready to run.
 	for _, job := range scheduler.jobInfos {
-		cli.CreateSingleJob(ctx, job)
+		cli.CreateJob(ctx, &job)
 		scheduler.availableJobs = append(scheduler.availableJobs, job)
 	}
 
@@ -57,13 +56,9 @@ func (scheduler *StaticScheduler) Run(ctx context.Context, cli *controller.Contr
 				availableCpus = availableCpus[nextJob.Threads:]
 
 				// Start the job.
-				if err := cli.ContainerStart(ctx, nextJob.Name,
-					types.ContainerStartOptions{}); err != nil {
-					log.Fatal(err)
-				}
+				cli.StartJob(ctx, nextJob.Name)
 				scheduler.runningJobs[nextJob.Name] = nextJob
 				scheduler.availableJobs = scheduler.availableJobs[1:]
-				log.Println("Started job", nextJob.Name)
 			}
 		}
 

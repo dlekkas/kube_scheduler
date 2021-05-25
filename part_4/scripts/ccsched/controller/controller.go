@@ -10,6 +10,7 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -22,9 +23,11 @@ type Controller struct {
 type CpuList []int
 
 type JobInfo struct {
-	Name    string
-	Threads int
-	CpuList CpuList
+	Name         string        // Name of the job.
+	Threads      int           // Number of threads to run the job.
+	CpuList      CpuList       // The cpus that the job is running on.
+	Eta          time.Duration // Estimated finish time of the job.
+	LastUnpaused time.Time     // Time when the job was last unpaused.
 }
 
 func (cpuList CpuList) String() string {
@@ -35,7 +38,7 @@ func (cpuList CpuList) String() string {
 	return strings.Join(cpuStrList, ",")
 }
 
-func getStartCommand(job JobInfo) []string {
+func getStartCommand(job *JobInfo) []string {
 	pkg := job.Name
 	if pkg == "splash2x-fft" {
 		pkg = "splash2x.fft"
@@ -44,8 +47,8 @@ func getStartCommand(job JobInfo) []string {
 		"-p", pkg, "-i", "native", "-n", strconv.Itoa(job.Threads)}
 }
 
-// Create a single job. After the job is created, the job is in READY state.
-func (cli *Controller) CreateSingleJob(ctx context.Context, job JobInfo) {
+// Create a single job.
+func (cli *Controller) CreateJob(ctx context.Context, job *JobInfo) {
 	id := job.Name
 	imageName := fmt.Sprintf("anakli/parsec:%v-native-reduced", id)
 
@@ -67,21 +70,28 @@ func (cli *Controller) CreateSingleJob(ctx context.Context, job JobInfo) {
 
 }
 
-func (cli *Controller) PauseJob(ctx context.Context, job JobInfo) {
-	id := job.Name
-	if err := cli.ContainerPause(ctx, id); err != nil {
+// Start a job that has been created.
+func (cli *Controller) StartJob(ctx context.Context, id string) {
+	if err := cli.ContainerStart(ctx, id,
+		types.ContainerStartOptions{}); err != nil {
 		log.Fatal(err)
 	}
-
-	log.Println("Paused job", id)
+	log.Println("Started job", id)
 }
 
-func (cli *Controller) UnpauseJob(ctx context.Context, job JobInfo) {
-	id := job.Name
+// Pausing a job could fail if it has already finished, but the scheduler is not aware of it yet.
+func (cli *Controller) PauseJob(ctx context.Context, id string) (err error) {
+	err = cli.ContainerPause(ctx, id)
+	if err == nil {
+		log.Println("Paused job", id)
+	}
+	return
+}
+
+func (cli *Controller) UnpauseJob(ctx context.Context, id string) {
 	if err := cli.ContainerUnpause(ctx, id); err != nil {
 		log.Fatal(err)
 	}
-
 	log.Println("Unpaused job", id)
 }
 
@@ -123,7 +133,9 @@ func (cli *Controller) SetMemcachedCpuAffinity(cpuList CpuList) {
 
 func (cli *Controller) WriteLogs(ctx context.Context, resultDir string, jobs []JobInfo) {
 	logPath := path.Join(resultDir, "logs")
-	_ = os.MkdirAll(logPath, 0755)
+	if err := os.MkdirAll(logPath, 0755); err != nil {
+		log.Fatal(err)
+	}
 	for _, job := range jobs {
 		id := job.Name
 		reader, err := cli.ContainerLogs(ctx, id, types.ContainerLogsOptions{
@@ -149,7 +161,9 @@ func (cli *Controller) WriteLogs(ctx context.Context, resultDir string, jobs []J
 	}
 
 	infoPath := path.Join(resultDir, "info")
-	_ = os.MkdirAll(infoPath, 0755)
+	if err := os.MkdirAll(infoPath, 0755); err != nil {
+		log.Fatal(err)
+	}
 	for _, job := range jobs {
 		id := job.Name
 		_, info, err := cli.ContainerInspectWithRaw(ctx, id, false)
