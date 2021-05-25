@@ -12,11 +12,11 @@ import (
 
 // A dyncamic scheduler that keeps memcached running on one dedicated core.
 const (
-	cpuWnd          = 2
+	cpuWnd          = 3
 	ncpu            = 4
 	cpuStatInterval = 500 // time in ms between each cpu stat update.
 	lowUsageThresh  = 40
-	highUsageThresh = 70
+	highUsageThresh = 85
 )
 
 type MC1Scheduler struct {

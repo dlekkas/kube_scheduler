@@ -114,6 +114,7 @@ func (s *MC1LargeScheduler) Run(ctx context.Context, cli *controller.Controller)
 		// Schedule jobs sequentially, favoring ones that are expected to finish earlier.
 		cpuJobs = s.getCpuJobs()
 		availCpus = make([]int, 0, ncpu)
+		availJobs = s.populateAvailableJobs()
 		for core := ncpu - 1; core >= 1; core-- {
 			if len(cpuJobs[core]) == 0 {
 				availCpus = append(availCpus, core)
