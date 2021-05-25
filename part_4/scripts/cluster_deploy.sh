@@ -9,41 +9,51 @@ PROJ_ROOT_DIR=..
 login_key=$HOME/.ssh/cloud-computing
 proj_id=cca-eth-2021-group-${GROUP_NO}
 
-# create a bucket in Google Cloud Storage (GCS) to store configuration only if
-# the bucket doesn't already exist
-bucket_id=gs://${proj_id}-${ETH_ID}/
-gsutil ls -b ${bucket_id} &>/dev/null || gsutil mb ${bucket_id}
-
-# modify part4.yaml bucket id.
-perl -i -pe "s/(?<= configBase: gs:\/\/${proj_id}-).*(?=\/part4.k8s.local)/${ETH_ID}/" ../part4.yaml
-
-if [ ! -f ${login_key} ]; then
-  echo "Creating an ssh key to login to Kubernetes nodes..."
-  ssh-keygen -t rsa -b 4096 -f cloud-computing
-fi
-
 export KOPS_STATE_STORE=${bucket_id}
 export PROJECT=$(gcloud config get-value project)
 export KOPS_FEATURE_FLAGS=AlphaAllowGCE # to unlock GCE features
 
-# create a kubernetes cluster based on the configuration file
-kops create -f ${PROJ_ROOT_DIR}/part4.yaml
+post_deploy=false
+while getopts 'p' flag; do
+  case "${flag}" in
+  p) post_deploy=true ;;
+  *) error "Unexpected option ${flag}" ;;
+  esac
+done
 
-# add ssh key as a login key for our nodes
-kops create secret --name part4.k8s.local sshpublickey admin -i ${login_key}.pub
+if [ "$post_deploy" = false ]; then
+  # create a bucket in Google Cloud Storage (GCS) to store configuration only if
+  # the bucket doesn't already exist
+  bucket_id=gs://${proj_id}-${ETH_ID}/
+  gsutil ls -b ${bucket_id} &>/dev/null || gsutil mb ${bucket_id}
 
-# deploy cluster
-kops update cluster --name part4.k8s.local --yes --admin
+  # modify part4.yaml bucket id.
+  perl -i -pe "s/(?<= configBase: gs:\/\/${proj_id}-).*(?=\/part4.k8s.local)/${ETH_ID}/" ../part4.yaml
 
-# sleep to allow enough time for the cluster to deploy to reduce verbosity
-sleep 180
+  if [ ! -f ${login_key} ]; then
+    echo "Creating an ssh key to login to Kubernetes nodes..."
+    ssh-keygen -t rsa -b 4096 -f cloud-computing
+  fi
+
+  # create a kubernetes cluster based on the configuration file
+  kops create -f ${PROJ_ROOT_DIR}/part4.yaml
+
+  # add ssh key as a login key for our nodes
+  kops create secret --name part4.k8s.local sshpublickey admin -i ${login_key}.pub
+
+  # deploy cluster
+  kops update cluster --name part4.k8s.local --yes --admin
+
+  # sleep to allow enough time for the cluster to deploy to reduce verbosity
+  sleep 180
+fi
 
 # validate cluster
 kops validate cluster --wait 10m
 
 kubectl get nodes -o wide
 
-echo "\nConfiguring cluster..."
+echo "Configuring cluster..."
 
 cat <<EOF >install_mcperf_dynamic.sh
 #!/bin/bash
@@ -92,12 +102,12 @@ chmod u+x install_memcached.sh
 cat <<EOF >pull_parsec_images.sh
 #!/bin/bash
 # Pull all docker images beforehand.
-anakli/parsec:splash2x-fft-native-reduced 
-anakli/parsec:freqmine-native-reduced
-anakli/parsec:ferret-native-reduced
-anakli/parsec:canneal-native-reduced
-anakli/parsec:dedup-native-reduced
-anakli/parsec:blackscholes-native-reduced
+docker pull -q anakli/parsec:splash2x-fft-native-reduced 
+docker pull -q anakli/parsec:freqmine-native-reduced
+docker pull -q anakli/parsec:ferret-native-reduced
+docker pull -q anakli/parsec:canneal-native-reduced
+docker pull -q anakli/parsec:dedup-native-reduced
+docker pull -q anakli/parsec:blackscholes-native-reduced
 EOF
 chmod u+x pull_parsec_images.sh
 
@@ -114,6 +124,3 @@ gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${MEMCACHED_NAME} \
   --zone=europe-west3-a --command='bash -s' <pull_parsec_images.sh
 
 rm install_memcached.sh install_mcperf_dynamic.sh pull_parsec_images.sh
-
-# spin up metrics server for monitoring utilization across kube nodes
-# kubectl apply -f ${PROJ_ROOT_DIR}/metrics.yaml

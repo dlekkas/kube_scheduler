@@ -105,7 +105,7 @@ func (s *MC1Scheduler) Run(ctx context.Context, cli *controller.Controller) {
 		cpuJobs = s.getCpuJobs()
 		availCpus := make([]int, 0, ncpu)
 		// Favor cpu2, cpu3 because jobs are less likely to be paused.
-		for core := ncpu; core >= 1; core-- {
+		for core := ncpu - 1; core >= 1; core-- {
 			if len(cpuJobs[core]) == 0 {
 				availCpus = append(availCpus, core)
 			}
