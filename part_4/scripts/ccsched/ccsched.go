@@ -60,7 +60,7 @@ func main() {
 	// Remove any existing containers.
 	cli.RemoveContainers(ctx, allJobs)
 
-	var sched Scheduler = &scheduler.MC1Scheduler{}
+	var sched Scheduler = &scheduler.MC1LargeScheduler{}
 	log.Printf("Running with scheduler %T", sched)
 	defer cli.RemoveContainers(ctx, allJobs)
 	sched.Init(ctx, cli)

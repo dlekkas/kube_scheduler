@@ -82,7 +82,7 @@ gcloud compute scp --ssh-key-file=${login_key} \
   ${res_dir}/${scheduler_res}/${measure_res} >/dev/null
 
 # format the results, keep only relevant data for our plots and store as CSV
-tail -n +7 ${res_dir}/${measure_res} | awk '{print $13, $17, $18}' | strings |
+tail -n +7 ${res_dir}/${scheduler_res}/${measure_res} | awk '{print $13, $17, $18}' | strings |
   tr ' ' ',' >${res_dir}/${scheduler_res}/latencies.csv
 
 # stop agent

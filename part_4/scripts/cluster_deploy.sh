@@ -8,6 +8,7 @@ PROJ_ROOT_DIR=..
 
 login_key=$HOME/.ssh/cloud-computing
 proj_id=cca-eth-2021-group-${GROUP_NO}
+bucket_id=gs://${proj_id}-${ETH_ID}/
 
 export KOPS_STATE_STORE=${bucket_id}
 export PROJECT=$(gcloud config get-value project)
@@ -24,7 +25,6 @@ done
 if [ "$post_deploy" = false ]; then
   # create a bucket in Google Cloud Storage (GCS) to store configuration only if
   # the bucket doesn't already exist
-  bucket_id=gs://${proj_id}-${ETH_ID}/
   gsutil ls -b ${bucket_id} &>/dev/null || gsutil mb ${bucket_id}
 
   # modify part4.yaml bucket id.
