@@ -125,8 +125,7 @@ def main(results_dir, qps_interval):
     # Add legend
     lines = p95 + qps
     labels = [l.get_label() for l in lines]
-    ax1.legend(lines, labels, bbox_to_anchor=(
-        0, 1, 1, 0), loc="lower left", ncol=2)
+    ax1.legend(lines, labels, loc="upper right")
 
     # Axis ordering and alignment
     plt.xlim([-100, 1900])
@@ -153,7 +152,8 @@ def main(results_dir, qps_interval):
     ax_annot.set_xlabel('Time (s)')
 
     # Save
-    plt.savefig(os.path.join(results_dir, 'plot_a.png'))
+    plt.savefig(os.path.join(results_dir, 'plot_a.png'),
+                bbox_inches='tight')
 
     # Plot B
     sns.set(style='darkgrid', font_scale=1.4)
@@ -169,8 +169,7 @@ def main(results_dir, qps_interval):
 
     lines = cores + qps
     labels = [l.get_label() for l in lines]
-    ax1.legend(lines, labels, bbox_to_anchor=(
-        0, 1, 1, 0), loc="lower left", ncol=2)
+    ax1.legend(lines, labels, loc="upper right")
 
     plt.xlim([-100, 1900])
     plt.xticks(range(0, 1801, 200))
@@ -194,7 +193,8 @@ def main(results_dir, qps_interval):
     ax_annot.set_yticklabels(sorted(list(bm_intervals.keys()), reverse=True))
     ax_annot.set_xlabel('Time (s)')
 
-    plt.savefig(os.path.join(results_dir, 'plot_b.png'))
+    plt.savefig(os.path.join(results_dir, 'plot_b.png'),
+                bbox_inches='tight')
 
 
 if __name__ == '__main__':
