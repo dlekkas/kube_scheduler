@@ -32,7 +32,7 @@ cd ..
 res_dir=${RESULTS_DIR}
 mkdir -p ${res_dir}
 
-for i in $(seq 1 1); do
+for i in $(seq 1 3); do
   echo "################ Rep ${i} ################"
 
   # Use 2 threads for memcached server.

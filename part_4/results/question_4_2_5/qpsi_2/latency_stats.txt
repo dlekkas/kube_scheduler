@@ -1,0 +1,3 @@
+Number of Violations: 38
+Total Points: 700
+Violation Ratio: 0.0543
