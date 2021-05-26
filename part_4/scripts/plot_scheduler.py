@@ -13,28 +13,22 @@ os.environ['TZ'] = 'GMT'
 time.tzset()
 
 
-def main(results_dir, qps_interval):
-    # Get the start timestamp from the raw latency file
-    start_ts = None
+def annotate_x(bm_intervals, ax):
+    # Plot the bottom task annotations
+    bar_w = 4
+    for i, (job, intervals) in enumerate(sorted(list(bm_intervals.items()), key=lambda x: x[0], reverse=True)):
+        ax.broken_barh(
+            intervals, (bar_w * (i + 1), bar_w - 0.4), facecolors='#55a868')
 
-    with open(os.path.join(results_dir, 'latencies.raw')) as latfile:
-        for line in latfile:
+    ax.set_yticks(
+        [(3 * bar_w / 2) + bar_w * j for j in range(len(bm_intervals))])
+    ax.set_yticklabels(sorted(list(bm_intervals.keys()), reverse=True))
+    ax.set_xlabel('Time (s)')
 
-            if line.startswith('Timestamp start: '):
-                start_ts = int(line[len('Timestamp start: '):])
 
-    if start_ts is None:
-        print('FAILED: Could not find start timestamp in raw latency file.')
-        return
-
-    # Read in the latencies
-    latencies = pd.read_csv(os.path.join(results_dir, 'latencies.csv'))
-
-    # Annotate the latencies DF with the timestamps
-    latencies['Time'] = (latencies.index + 1) * qps_interval
-
+def parse_scheduler_log(logfile, start_ts, qps_interval):
     # Read in the scheduler log
-    with open(os.path.join(results_dir, 'scheduler.log')) as logfile:
+    with open(logfile) as logfile:
         log = logfile.readlines()
 
     # Parse memcached cores into DataFrame
@@ -96,13 +90,14 @@ def main(results_dir, qps_interval):
     # Get the finish time of the scheduler end
     end_time += end_time % qps_interval
 
-    # Trim all latency data to the 'end' of the scheduler
-    latencies = latencies[latencies['Time'] <= end_time]
-
     # Add finisher to memcached_cores to finish curve
     memcached_cores = memcached_cores.append(
         {'Time': end_time, 'Cores': curr_cores}, ignore_index=True)
 
+    return end_time, bm_intervals, memcached_cores
+
+
+def plot_a(latencies, bm_intervals, outfile):
     # Plot A
     sns.set(style='darkgrid', font_scale=1.4)
     figure, (ax1, ax_annot) = plt.subplots(nrows=2, ncols=1, sharex=True,
@@ -125,7 +120,8 @@ def main(results_dir, qps_interval):
     # Add legend
     lines = p95 + qps
     labels = [l.get_label() for l in lines]
-    ax1.legend(lines, labels, loc="upper right")
+    ax1.legend(lines, labels, bbox_to_anchor=(
+        0, 1, 1, 0), loc="lower left", ncol=2)
 
     # Axis ordering and alignment
     plt.xlim([-100, 1900])
@@ -136,25 +132,18 @@ def main(results_dir, qps_interval):
     ax2.set_yticks(range(0, 100001, 25000))
     ax2.set_ylim([0, 105001])
 
+    # Annotate x
+    annotate_x(bm_intervals, ax_annot)
+
     # Labels
     ax2.set_ylabel('Achieved QPS (#queries / sec)')
-    ax1.set_ylabel('p95 Latency (ms)')
-
-    # Plot the bottom task annotations
-    bar_w = 4
-    for i, (job, intervals) in enumerate(sorted(list(bm_intervals.items()), key=lambda x: x[0], reverse=True)):
-        ax_annot.broken_barh(
-            intervals, (bar_w * (i + 1), bar_w - 0.4), facecolors='#55a868')
-
-    ax_annot.set_yticks(
-        [(3 * bar_w / 2) + bar_w * j for j in range(len(bm_intervals))])
-    ax_annot.set_yticklabels(sorted(list(bm_intervals.keys()), reverse=True))
-    ax_annot.set_xlabel('Time (s)')
+    ax1.set_ylabel('p95 Latency (µs)')
 
     # Save
-    plt.savefig(os.path.join(results_dir, 'plot_a.png'),
-                bbox_inches='tight')
+    plt.savefig(os.path.join(outfile), bbox_inches='tight')
 
+
+def plot_b(latencies, bm_intervals, memcached_cores, outfile):
     # Plot B
     sns.set(style='darkgrid', font_scale=1.4)
     figure, (ax1, ax_annot) = plt.subplots(nrows=2, ncols=1, sharex=True,
@@ -163,13 +152,14 @@ def main(results_dir, qps_interval):
 
     ax2 = ax1.twinx()
     cores = ax1.plot(memcached_cores['Time'], memcached_cores['Cores'],
-                     color='#e74c3c', label='Memcached Cores', linewidth=2)
+                     color='#e74c3c', label='Memcached Cores', linewidth=1)
     qps = ax2.plot(latencies['Time'], latencies['QPS'], marker='o',
                    markersize=3, color='#3498db', label='Achieved QPS', alpha=0.6)
 
     lines = cores + qps
     labels = [l.get_label() for l in lines]
-    ax1.legend(lines, labels, loc="upper right")
+    ax1.legend(lines, labels, bbox_to_anchor=(
+        0, 1, 1, 0), loc="lower left", ncol=2)
 
     plt.xlim([-100, 1900])
     plt.xticks(range(0, 1801, 200))
@@ -183,18 +173,51 @@ def main(results_dir, qps_interval):
     ax1.set_ylabel('Cores Allocated to Memcached (#Cores)')
 
     # Plot the bottom task annotations
-    bar_w = 4
-    for i, (job, intervals) in enumerate(sorted(list(bm_intervals.items()), key=lambda x: x[0], reverse=True)):
-        ax_annot.broken_barh(
-            intervals, (bar_w * (i + 1), bar_w - 0.4), facecolors='#55a868')
+    annotate_x(bm_intervals, ax_annot)
 
-    ax_annot.set_yticks(
-        [(3 * bar_w / 2) + bar_w * j for j in range(len(bm_intervals))])
-    ax_annot.set_yticklabels(sorted(list(bm_intervals.keys()), reverse=True))
-    ax_annot.set_xlabel('Time (s)')
+    plt.savefig(outfile, bbox_inches='tight')
 
-    plt.savefig(os.path.join(results_dir, 'plot_b.png'),
-                bbox_inches='tight')
+
+def main(results_dir, qps_interval):
+    # Get the start timestamp from the raw latency file
+    start_ts = None
+
+    with open(os.path.join(results_dir, 'latencies.raw')) as latfile:
+        for line in latfile:
+
+            if line.startswith('Timestamp start: '):
+                start_ts = int(line[len('Timestamp start: '):])
+
+    if start_ts is None:
+        print('FAILED: Could not find start timestamp in raw latency file.')
+        return
+
+    # Read in the latencies
+    latencies = pd.read_csv(os.path.join(results_dir, 'latencies.csv'))
+
+    # Annotate the latencies DF with the timestamps
+    latencies['Time'] = (latencies.index + 1) * qps_interval
+
+    # Parse the scheduler log
+    end_time, bm_intervals, memcached_cores = parse_scheduler_log(
+        os.path.join(results_dir, 'scheduler.log'), start_ts, qps_interval)
+
+    # Trim all latency data to the 'end' of the scheduler
+    latencies = latencies[latencies['Time'] <= end_time]
+
+    # Quickly calculate SLO stats and print to a file
+    with open(os.path.join(results_dir, 'latency_stats.txt'), 'w') as f:
+        violations = len(latencies[latencies['p95'] > 2000])
+        total = len(latencies)
+        f.write('Number of Violations: {}\n'.format(violations))
+        f.write('Total Points: {}\n'.format(total))
+        f.write('Violation Ratio: {:.4f}\n'.format(
+            float(violations) / float(total)))
+
+    # Generate the plots
+    plot_a(latencies, bm_intervals, os.path.join(results_dir, 'plot_a.pdf'))
+    plot_b(latencies, bm_intervals, memcached_cores,
+           os.path.join(results_dir, 'plot_b.pdf'))
 
 
 if __name__ == '__main__':

@@ -23,8 +23,8 @@ def generate_plot(latencies_df, results_dir):
     axes.yaxis.set_tick_params(labelsize='small')
 
     # titles
-    fig.suptitle('Memcached Performance Plot')
-    plt.ylabel('Mean p95 latency (ns)')
+    plt.title('Memcached Performance')
+    plt.ylabel('Mean p95 latency (µs)')
     plt.xlabel('Mean QPS (#queries / sec)')
 
     # specify limits
@@ -37,8 +37,8 @@ def generate_plot(latencies_df, results_dir):
                       label='T = {}, C = {}'.format(comb[0], comb[1]),
                       **line_opts)
     axes.legend()
-    output_f = os.path.join(Path(results_dir), 'perf_plot.png')
-    plt.savefig(output_f, pad_inches=0)
+    output_f = os.path.join(Path(results_dir), 'perf_plot.pdf')
+    plt.savefig(output_f, pad_inches=0, bbox_inches='tight')
 
 
 def main(results_dir, input_csv):
