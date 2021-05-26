@@ -26,7 +26,7 @@ def annotate_x(bm_intervals, ax):
     ax.set_xlabel('Time (s)')
 
 
-def parse_scheduler_log(logfile, start_ts, qps_interval):
+def parse_scheduler_log(logfile, start_ts, qps_interval=None):
     # Read in the scheduler log
     with open(logfile) as logfile:
         log = logfile.readlines()
@@ -88,7 +88,8 @@ def parse_scheduler_log(logfile, start_ts, qps_interval):
                 (bm_open[job_name], rel_time - bm_open[job_name]))
 
     # Get the finish time of the scheduler end
-    end_time += end_time % qps_interval
+    if qps_interval is not None:
+        end_time += end_time % qps_interval
 
     # Add finisher to memcached_cores to finish curve
     memcached_cores = memcached_cores.append(
