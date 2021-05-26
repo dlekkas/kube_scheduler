@@ -19,35 +19,35 @@ iter_num = 8192
 iter_num = 8192
 Transpose: iter_num = 0
 Transpose: iter_num = 67108864
+Step 1: 16113052
 FFt1DOnce: iter_num = 114688
-Step 1: 13247271
-Step 2: 28392890
 Transpose: iter_num = 0
+Step 2: 29495528
 Transpose: iter_num = 67108864
-Step 3:  5988201
-Step 4: 28634919
+Step 3:  7578760
 Transpose: iter_num = 0
+Step 4: 26305514
 Transpose: iter_num = 67108864
-Step 5:  5127570
+Step 5:  4539138
 
                  PROCESS STATISTICS
             Computation      Transpose     Transpose
  Proc          Time            Time        Fraction
-    0          81391005       24363042       0.29933
+    0          84132157       28230950       0.33555
 
                  TIMING INFORMATION
-Start time                        : 1622041329369021
-Initialization finish time        : 1622041371728709
-Overall finish time               : 1622041453119714
-Total time with initialization    :        123750693
-Total time without initialization :         81391005
-Overall transpose time            :         24363042
-Overall transpose fraction        :          0.29933
+Start time                        : 1622060058799994
+Initialization finish time        : 1622060105177854
+Overall finish time               : 1622060189310011
+Total time with initialization    :        130510017
+Total time without initialization :         84132157
+Overall transpose time            :         28230950
+Overall transpose fraction        :          0.33555
 
 
-real	2m4.705s
-user	2m35.103s
-sys	0m50.944s
+real	2m11.234s
+user	2m42.493s
+sys	0m49.308s
 [PARSEC] [----------    End of output    ----------]
 [PARSEC]
 [PARSEC] BIBLIOGRAPHY

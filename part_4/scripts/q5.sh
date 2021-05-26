@@ -5,7 +5,7 @@ set -x
 
 login_key=$HOME/.ssh/cloud-computing
 
-qps_interval=5
+qps_interval=3
 
 PROJ_ROOT_DIR=..
 RESULTS_DIR=${PROJ_ROOT_DIR}/results/question_4_2_5
