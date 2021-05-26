@@ -47,6 +47,12 @@ func (s *MC1Scheduler) Init(ctx context.Context, cli *controller.Controller) {
 		s.createdJobs[id] = true
 	}
 
+	for core, stat := range s.cpuStat {
+		for t := range stat {
+			s.cpuStat[core][t] = 100
+		}
+	}
+
 	// Assume memcached run on 2 cores at the start.
 	s.mc1core = false
 
@@ -68,6 +74,9 @@ func (s *MC1Scheduler) Run(ctx context.Context, cli *controller.Controller) {
 			}
 		}
 
+		// Get available jobs for single and double-threaded jobs respectively.
+		availJobs1, availJobs2 := s.populateAvailableJobs()
+
 		if cpu0HighUsage && s.mc1core {
 			// memcached run on 2 cores to avoid SLO violation.
 			cli.SetMemcachedCpuAffinity(controller.CpuList{0, 1})
@@ -78,7 +87,7 @@ func (s *MC1Scheduler) Run(ctx context.Context, cli *controller.Controller) {
 			s.mc1core = false
 		}
 
-		if cpu0LowUsage && !s.mc1core {
+		if cpu0LowUsage && !s.mc1core && len(availJobs1)+len(availJobs2) > 0 {
 			// memcached run on 1 core to spare resources for PARSEC.
 			cli.SetMemcachedCpuAffinity(controller.CpuList{0})
 			s.mc1core = true
@@ -94,8 +103,7 @@ func (s *MC1Scheduler) Run(ctx context.Context, cli *controller.Controller) {
 			}
 		}
 
-		// Handle single- and double-threaded jobs separately.
-		availJobs1, availJobs2 := s.populateAvailableJobs()
+		// Handle single and double-threaded jobs separately.
 		if len(availCpus) >= 2 && len(availJobs2) > 0 {
 			job := availJobs2[0]
 			cli.SetJobCpuAffinity(ctx, job, availCpus)
