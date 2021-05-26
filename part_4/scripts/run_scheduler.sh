@@ -5,6 +5,8 @@ set -x
 
 login_key=$HOME/.ssh/cloud-computing
 
+qps_interval=10
+
 PROJ_ROOT_DIR=..
 RESULTS_DIR=${PROJ_ROOT_DIR}/results/question_4_2_3
 mkdir -p ${RESULTS_DIR}
@@ -59,7 +61,7 @@ measure_res=latencies.raw
 gcloud compute ssh --ssh-key-file=${login_key} --zone=europe-west3-a ubuntu@${CLIENT_MEASURE_NAME} \
   --command="./memcache-perf-dynamic/mcperf -s ${INTERNAL_MEMCACHED_IP} \
       -a ${INTERNAL_AGENT_IP} --noload -T 16 -C 4 -D 4 -Q 1000 -c 4 \
-      -t 1800 --qps_interval 10 --qps_min 5000 --qps_max 100000 > ${measure_res}" &
+      -t 1800 --qps_interval ${qps_interval} --qps_min 5000 --qps_max 100000 > ${measure_res}" &
 measure_pid=$!
 
 # Run the scheduler.
@@ -84,6 +86,9 @@ gcloud compute scp --ssh-key-file=${login_key} \
 # format the results, keep only relevant data for our plots and store as CSV
 tail -n +7 ${res_dir}/${scheduler_res}/${measure_res} | awk '{print $13, $17, $18}' | strings |
   tr ' ' ',' >${res_dir}/${scheduler_res}/latencies.csv
+
+# pass the result files into a python script to generate those plots
+python3 plot_scheduler.py --results-dir ${res_dir} --qps-interval ${qps_interval}
 
 # stop agent
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${AGENT_NAME} \
