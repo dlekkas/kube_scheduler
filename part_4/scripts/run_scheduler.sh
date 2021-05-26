@@ -21,7 +21,8 @@ CLIENT_MEASURE_NAME=$(kubectl get nodes | grep client-measure | awk '{print $1}'
 
 # Use 2 threads for memcached server.
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${MEMCACHED_NAME} \
-  --command="sudo sed -i '/^-t /c\-t 2' /etc/memcached.conf; sudo systemctl restart memcached"
+  --command="sudo sed -i '/^-t /c\-t 2' /etc/memcached.conf; sudo systemctl restart memcached; \
+      sleep 5; pidof memcached | xargs sudo taskset -a -cp 0-1"
 sleep 10
 
 # Stop running measure and agent
@@ -88,7 +89,7 @@ tail -n +7 ${res_dir}/${scheduler_res}/${measure_res} | awk '{print $13, $17, $1
   tr ' ' ',' >${res_dir}/${scheduler_res}/latencies.csv
 
 # pass the result files into a python script to generate those plots
-python3 plot_scheduler.py --results-dir ${res_dir} --qps-interval ${qps_interval}
+python3 plot_scheduler.py --results-dir ${res_dir}/${scheduler_res} --qps-interval ${qps_interval}
 
 # stop agent
 gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${AGENT_NAME} \

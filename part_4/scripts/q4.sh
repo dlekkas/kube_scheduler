@@ -33,10 +33,12 @@ res_dir=${RESULTS_DIR}
 mkdir -p ${res_dir}
 
 for i in $(seq 1 ${n_reps}); do
-  echo "######### ####### Rep ${i} ################"
+  echo "################ Rep ${i} ################"
+
   # Use 2 threads for memcached server.
   gcloud compute ssh --ssh-key-file=${login_key} ubuntu@${MEMCACHED_NAME} \
-    --command="sudo sed -i '/^-t /c\-t 2' /etc/memcached.conf; sudo systemctl restart memcached"
+    --command="sudo sed -i '/^-t /c\-t 2' /etc/memcached.conf; sudo systemctl restart memcached; \
+      sleep 5; pidof memcached | xargs sudo taskset -a -cp 0-1"
   sleep 10
 
   # Stop running measure and agent
