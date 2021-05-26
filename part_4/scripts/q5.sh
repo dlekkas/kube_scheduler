@@ -5,10 +5,10 @@ set -x
 
 login_key=$HOME/.ssh/cloud-computing
 
-qps_interval=10
+qps_interval=5
 
 PROJ_ROOT_DIR=..
-RESULTS_DIR=${PROJ_ROOT_DIR}/results/question_4_2_4
+RESULTS_DIR=${PROJ_ROOT_DIR}/results/question_4_2_5
 mkdir -p ${RESULTS_DIR}
 
 MEMCACHED_NAME=$(kubectl get nodes | grep memcache-server | awk '{print $1}')
@@ -32,7 +32,7 @@ cd ..
 res_dir=${RESULTS_DIR}
 mkdir -p ${res_dir}
 
-for i in $(seq 1 3); do
+for i in $(seq 1 1); do
   echo "################ Rep ${i} ################"
 
   # Use 2 threads for memcached server.
