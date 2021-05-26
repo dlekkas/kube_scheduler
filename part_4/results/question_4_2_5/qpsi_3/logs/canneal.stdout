@@ -42,9 +42,9 @@ Just saw element: 2500000
 netlist created. 2500000 elements.
 Final routing is: 9.03315e+09
 
-real	17m17.981s
-user	8m59.532s
-sys	0m31.782s
+real	21m4.837s
+user	8m5.658s
+sys	0m48.347s
 [PARSEC] [----------    End of output    ----------]
 [PARSEC]
 [PARSEC] BIBLIOGRAPHY
