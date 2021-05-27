@@ -13,19 +13,6 @@ os.environ['TZ'] = 'GMT'
 time.tzset()
 
 
-def annotate_x(bm_intervals, ax):
-    # Plot the bottom task annotations
-    bar_w = 4
-    for i, (job, intervals) in enumerate(sorted(list(bm_intervals.items()), key=lambda x: x[0], reverse=True)):
-        ax.broken_barh(
-            intervals, (bar_w * (i + 1), bar_w - 0.4), facecolors='#55a868')
-
-    ax.set_yticks(
-        [(3 * bar_w / 2) + bar_w * j for j in range(len(bm_intervals))])
-    ax.set_yticklabels(sorted(list(bm_intervals.keys()), reverse=True))
-    ax.set_xlabel('Time (s)')
-
-
 def parse_scheduler_log(logfile, start_ts, qps_interval=None):
     # Read in the scheduler log
     with open(logfile) as logfile:
@@ -98,13 +85,7 @@ def parse_scheduler_log(logfile, start_ts, qps_interval=None):
     return end_time, bm_intervals, memcached_cores
 
 
-def plot_a(latencies, bm_intervals, outfile):
-    # Plot A
-    sns.set(style='darkgrid', font_scale=1.4)
-    figure, (ax1, ax_annot) = plt.subplots(nrows=2, ncols=1, sharex=True,
-                                           figsize=(16, 9), gridspec_kw={'height_ratios': [2, 1]})
-    plt.subplots_adjust(wspace=0, hspace=0.05)
-
+def plot_a(ax1, latencies):
     # Plot the main plot A component in the first subplot
     ax2 = ax1.twinx()
     p95 = ax1.plot(latencies['Time'], latencies['p95'], marker='o',
@@ -112,58 +93,34 @@ def plot_a(latencies, bm_intervals, outfile):
     qps = ax2.plot(latencies['Time'], latencies['QPS'], marker='o',
                    markersize=3, color='#3498db', label='Achieved QPS', alpha=0.6)
 
+    slo = ax1.axhline(y=2000, xmin=0.02, xmax=0.98,
+                      color='#666', linestyle='--', label='2ms SLO')
+
     # Order so latency appears on top
     ax1.set_zorder(2)
     ax1.patch.set_visible(False)
     ax1.yaxis.grid(False)
     ax2.patch.set_visible(True)
 
-    # Add legend
-    lines = p95 + qps
-    labels = [l.get_label() for l in lines]
-    ax1.legend(lines, labels, bbox_to_anchor=(
-        0, 1, 1, 0), loc="lower left", ncol=2)
-
-    # Axis ordering and alignment
-    plt.xlim([-100, 1900])
-    plt.xticks(range(0, 1801, 200))
-
     ax1.set_yticks(range(0, 4001, 1000))
     ax1.set_ylim([0, 4201])
     ax2.set_yticks(range(0, 100001, 25000))
     ax2.set_ylim([0, 105001])
 
-    # Annotate x
-    annotate_x(bm_intervals, ax_annot)
-
     # Labels
     ax2.set_ylabel('Achieved QPS (#queries / sec)')
     ax1.set_ylabel('p95 Latency (µs)')
 
-    # Save
-    plt.savefig(os.path.join(outfile), bbox_inches='tight')
+    # Return lines to build legend
+    return p95, slo, qps
 
 
-def plot_b(latencies, bm_intervals, memcached_cores, outfile):
-    # Plot B
-    sns.set(style='darkgrid', font_scale=1.4)
-    figure, (ax1, ax_annot) = plt.subplots(nrows=2, ncols=1, sharex=True,
-                                           figsize=(16, 9), gridspec_kw={'height_ratios': [2, 1]})
-    plt.subplots_adjust(wspace=0, hspace=0.05)
-
+def plot_b(ax1, latencies, memcached_cores):
     ax2 = ax1.twinx()
     cores = ax1.plot(memcached_cores['Time'], memcached_cores['Cores'],
                      color='#e74c3c', label='Memcached Cores', linewidth=1)
     qps = ax2.plot(latencies['Time'], latencies['QPS'], marker='o',
                    markersize=3, color='#3498db', label='Achieved QPS', alpha=0.6)
-
-    lines = cores + qps
-    labels = [l.get_label() for l in lines]
-    ax1.legend(lines, labels, bbox_to_anchor=(
-        0, 1, 1, 0), loc="lower left", ncol=2)
-
-    plt.xlim([-100, 1900])
-    plt.xticks(range(0, 1801, 200))
 
     ax1.set_yticks([1, 2])
     ax1.set_ylim([0.9, 9])
@@ -171,10 +128,44 @@ def plot_b(latencies, bm_intervals, memcached_cores, outfile):
     ax2.set_ylim([0, 105001])
 
     ax2.set_ylabel('Achieved QPS (#queries / sec)')
-    ax1.set_ylabel('Cores Allocated to Memcached (#Cores)')
+    ax1.set_ylabel('Memcached Cores (#cores)')
 
+    return cores, qps
+
+
+def annotate_x(ax, bm_intervals):
     # Plot the bottom task annotations
-    annotate_x(bm_intervals, ax_annot)
+    bar_w = 4
+    for i, (job, intervals) in enumerate(sorted(list(bm_intervals.items()), key=lambda x: x[0], reverse=True)):
+        ax.broken_barh(
+            intervals, (bar_w * (i + 1), bar_w - 0.4), facecolors='#55a868')
+
+    ax.set_yticks(
+        [(3 * bar_w / 2) + bar_w * j for j in range(len(bm_intervals))])
+    ax.set_yticklabels(sorted(list(bm_intervals.keys()), reverse=True))
+    ax.set_xlabel('Time (s)')
+
+
+def plot_merged(latencies, bm_intervals, memcached_cores, outfile):
+    # Create merged subplots
+    sns.set(style='darkgrid', font_scale=1.4)
+    fig, (ax_a, ax_b, ax_annot) = plt.subplots(nrows=3, ncols=1, sharex=True,
+                                               figsize=(16, 15), gridspec_kw={'height_ratios': [2, 2, 1]})
+    plt.subplots_adjust(wspace=0, hspace=0.05)
+
+    # Use functions to generate plots
+    p95, slo, qps = plot_a(ax_a, latencies)
+    cores, _ = plot_b(ax_b, latencies, memcached_cores)
+    annotate_x(ax_annot, bm_intervals)
+
+    # Add shared legend
+    lines = p95 + qps + cores + [slo]
+    labels = [l.get_label() for l in lines]
+    ax_a.legend(lines, labels, bbox_to_anchor=(
+        0, 1, 1, 0), loc="lower left", ncol=4)
+
+    plt.xlim([-100, 1900])
+    plt.xticks(range(0, 1801, 200))
 
     plt.savefig(outfile, bbox_inches='tight')
 
@@ -196,7 +187,7 @@ def main(results_dir, qps_interval):
     # Read in the latencies
     latencies = pd.read_csv(os.path.join(results_dir, 'latencies.csv'))
 
-    # Annotate the latencies DF with the timestamps
+    # Annotate the latencies DF with the timestamps and SLO
     latencies['Time'] = (latencies.index + 1) * qps_interval
 
     # Parse the scheduler log
@@ -207,18 +198,18 @@ def main(results_dir, qps_interval):
     latencies = latencies[latencies['Time'] <= end_time]
 
     # Quickly calculate SLO stats and print to a file
+    violations = len(latencies[latencies['p95'] > 2000])
+    total = len(latencies)
+
     with open(os.path.join(results_dir, 'latency_stats.txt'), 'w') as f:
-        violations = len(latencies[latencies['p95'] > 2000])
-        total = len(latencies)
         f.write('Number of Violations: {}\n'.format(violations))
         f.write('Total Points: {}\n'.format(total))
         f.write('Violation Ratio: {:.4f}\n'.format(
             float(violations) / float(total)))
 
     # Generate the plots
-    plot_a(latencies, bm_intervals, os.path.join(results_dir, 'plot_a.pdf'))
-    plot_b(latencies, bm_intervals, memcached_cores,
-           os.path.join(results_dir, 'plot_b.pdf'))
+    plot_merged(latencies, bm_intervals, memcached_cores,
+                os.path.join(results_dir, 'plot_merged.pdf'))
 
 
 if __name__ == '__main__':
