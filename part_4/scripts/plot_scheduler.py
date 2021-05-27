@@ -112,7 +112,7 @@ def plot_a(ax1, latencies):
     ax1.set_ylabel('p95 Latency (µs)')
 
     # Return lines to build legend
-    return p95, slo, qps
+    return ax2, p95, slo, qps
 
 
 def plot_b(ax1, latencies, memcached_cores):
@@ -130,7 +130,7 @@ def plot_b(ax1, latencies, memcached_cores):
     ax2.set_ylabel('Achieved QPS (#queries / sec)')
     ax1.set_ylabel('Memcached Cores (#cores)')
 
-    return cores, qps
+    return ax2, cores, qps
 
 
 def annotate_x(ax, bm_intervals):
@@ -146,7 +146,7 @@ def annotate_x(ax, bm_intervals):
     ax.set_xlabel('Time (s)')
 
 
-def plot_merged(latencies, bm_intervals, memcached_cores, outfile):
+def plot_merged(latencies, bm_intervals, memcached_cores, rep, outfile):
     # Create merged subplots
     sns.set(style='darkgrid', font_scale=1.4)
     fig, (ax_a, ax_b, ax_annot) = plt.subplots(nrows=3, ncols=1, sharex=True,
@@ -154,8 +154,8 @@ def plot_merged(latencies, bm_intervals, memcached_cores, outfile):
     plt.subplots_adjust(wspace=0, hspace=0.05)
 
     # Use functions to generate plots
-    p95, slo, qps = plot_a(ax_a, latencies)
-    cores, _ = plot_b(ax_b, latencies, memcached_cores)
+    ax_p95, p95, slo, qps = plot_a(ax_a, latencies)
+    ax_cores, cores, _ = plot_b(ax_b, latencies, memcached_cores)
     annotate_x(ax_annot, bm_intervals)
 
     # Add shared legend
@@ -164,13 +164,20 @@ def plot_merged(latencies, bm_intervals, memcached_cores, outfile):
     ax_a.legend(lines, labels, bbox_to_anchor=(
         0, 1, 1, 0), loc="lower left", ncol=4)
 
+    # Label axes
+    if rep is not None:
+        ax_a.text(0.93, 0.93, 'Plot {}A'.format(rep),
+                  transform=ax_a.transAxes, zorder=20)
+        ax_cores.text(0.93, 0.93, 'Plot {}B'.format(rep),
+                      transform=ax_b.transAxes, zorder=20)
+
     plt.xlim([-100, 1900])
     plt.xticks(range(0, 1801, 200))
 
     plt.savefig(outfile, bbox_inches='tight')
 
 
-def main(results_dir, qps_interval):
+def main(results_dir, qps_interval, rep):
     # Get the start timestamp from the raw latency file
     start_ts = None
 
@@ -208,7 +215,7 @@ def main(results_dir, qps_interval):
             float(violations) / float(total)))
 
     # Generate the plots
-    plot_merged(latencies, bm_intervals, memcached_cores,
+    plot_merged(latencies, bm_intervals, memcached_cores, rep,
                 os.path.join(results_dir, 'plot_merged.pdf'))
 
 
@@ -218,5 +225,7 @@ if __name__ == '__main__':
                         required=True)
     parser.add_argument('--qps-interval', help='Interval of dynamic mcperf QPS in seconds',
                         required=True)
+    parser.add_argument(
+        '--rep', help='Integer representing repetition (optional)')
     args = parser.parse_args()
-    main(args.results_dir, int(args.qps_interval))
+    main(args.results_dir, int(args.qps_interval), args.rep)
