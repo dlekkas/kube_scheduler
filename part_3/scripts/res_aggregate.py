@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+import seaborn as sns
 import pandas as pd
 import numpy as np
 
@@ -31,12 +32,13 @@ def main(results_dir, n_reps):
     print(tabulate(result, headers='keys', tablefmt = 'psql'),
             file=open(output_f, 'w'))
 
-
     for i in range(1, n_reps+1):
         curr_res_dir = Path(os.path.join(Path(results_dir), 'rep_{}'.format(i)))
-        figure, axes = plt.subplots(nrows=2, ncols=1, sharex=True, figsize=(12,8))
+        sns.set(style='darkgrid', font_scale=1.4)
+        figure, axes = plt.subplots(nrows=2, ncols=1, sharex=True, figsize=(16,7.5))
+        plt.subplots_adjust(wspace=0, hspace=0.1)
         #figure, axes = plt.subplots(nrows=2, ncols=1, figsize=(13,8))
-        figure.suptitle('Repetition #{}'.format(i), fontsize=18)
+        axes[0].set_title('Repetition #{}'.format(i), fontsize=16)
 
         curr_lat_f = os.path.join(Path(curr_res_dir), latencies_f)
         latencies_df = pd.read_csv(curr_lat_f, delim_whitespace=True)
@@ -49,7 +51,7 @@ def main(results_dir, n_reps):
                 20*i for i in range(1,len(latencies_df)+1))
 
         latencies_df.plot(x='time', y='p95', kind='line', marker='o', ax=axes[0])
-        axes[0].set_ylabel('p95 latency [ms]')
+        axes[0].set_ylabel('p95 latency [μs]')
 
         legend_dict = {'node-a-2core': 'red', 'node-b-4core': 'black', 'node-c-8core': 'blue'}
         patchList = []
@@ -72,7 +74,8 @@ def main(results_dir, n_reps):
         axes[1].set_xlim(0, 375)
         axes[1].set_xlabel('Time [s]')
 
-        plt.savefig(os.path.join(Path(curr_res_dir), 'slo_plot.png'))
+        outfile = os.path.join(Path(curr_res_dir), 'slo_plot.pdf')
+        plt.savefig(outfile, bbox_inches='tight')
 
 
 if __name__=="__main__":
